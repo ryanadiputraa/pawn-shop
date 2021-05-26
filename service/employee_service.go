@@ -22,7 +22,7 @@ type EmployeeService interface {
 
 type employeeService struct {}
 
-func New() EmployeeService {
+func NewEmployeeService() EmployeeService {
 	return &employeeService{}
 }
 

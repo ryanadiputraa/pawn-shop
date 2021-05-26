@@ -12,8 +12,11 @@ import (
 )
 
 var (
-	employeeService service.EmployeeService = service.New()
-	employeeController controller.EmployeeController = controller.New(employeeService)
+	employeeService service.EmployeeService = service.NewEmployeeService()
+	employeeController controller.EmployeeController = controller.NewEmployeeController(employeeService)
+	customerService service.CustomerService = service.NewCustomerService()
+	customerContoller controller.CustomerController = controller.NewCustomerController(customerService)
+
 )
 
 func init() {

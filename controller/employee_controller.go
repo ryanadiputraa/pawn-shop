@@ -15,30 +15,30 @@ type EmployeeController interface {
 	Login(ctx *gin.Context)
 }
 
-type controller struct {
+type employeeController struct {
 	service service.EmployeeService
 }
 
-func New(service service.EmployeeService) EmployeeController {
-	return &controller {
+func NewEmployeeController(service service.EmployeeService) EmployeeController {
+	return &employeeController {
 		service: service,
 	}
 }
 
-func (c *controller) GetAllEmployees(ctx *gin.Context) {
+func (c *employeeController) GetAllEmployees(ctx *gin.Context) {
 	code, response := c.service.GetAllEmployees()
 
 	helper.WriteResponse(ctx, code, response)
 }
 
-func (c *controller) GetEmployeeById(ctx *gin.Context) {
+func (c *employeeController) GetEmployeeById(ctx *gin.Context) {
 	employeeId := ctx.Param("employee_id")
 	code, response := c.service.GetEmployeeById(employeeId)
 
 	helper.WriteResponse(ctx, code, response)
 }
 
-func (c *controller) Register(ctx *gin.Context) {
+func (c *employeeController) Register(ctx *gin.Context) {
 	var employee entity.Employee
 	ctx.BindJSON(&employee)
 	code, response := c.service.Register(employee)
@@ -46,7 +46,7 @@ func (c *controller) Register(ctx *gin.Context) {
 	helper.WriteResponse(ctx, code, response)
 }
 
-func (c *controller) Login(ctx *gin.Context) {
+func (c *employeeController) Login(ctx *gin.Context) {
 	var loginData entity.LoginEmployee
 	ctx.BindJSON(&loginData)
 	code, response := c.service.Login(loginData, ctx)
@@ -54,7 +54,7 @@ func (c *controller) Login(ctx *gin.Context) {
 	helper.WriteResponse(ctx, code, response)
 }
 
-func (c *controller) DeleteEmployee(ctx *gin.Context) {
+func (c *employeeController) DeleteEmployee(ctx *gin.Context) {
 	employeeId := ctx.Param("employee_id")
 	code, response := c.service.DeleteEmployee(employeeId)
 
