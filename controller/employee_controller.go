@@ -32,7 +32,13 @@ func (c *controller) GetAllEmployees(ctx *gin.Context) {
 }
 
 func (c *controller) GetEmployeeById(ctx *gin.Context) {
+	employeeId := ctx.Param("employee_id")
+	code, response := c.service.GetEmployeeById(employeeId)
 
+	ctx.Header("Content-Type", "application/json")
+	ctx.Header("Access-Control-Allow-Origin", "*")
+	ctx.JSON(code, response)
+	return
 }
 
 func (c *controller) Register(ctx *gin.Context){

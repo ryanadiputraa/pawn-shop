@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/ryanadiputraa/pawn-shop/config"
@@ -10,6 +11,7 @@ import (
 
 type EmployeeService interface {
 	GetAllEmployees() (int, interface{})
+	GetEmployeeById(employee_id string) (int, interface{})
 	Register(entity.Employee) (int, interface{})
 }
 
@@ -45,11 +47,54 @@ func (service *employeeService) GetAllEmployees() (int, interface{}) {
 	var employees []entity.Employee
 	for rows.Next() {
 		var employee entity.Employee
-		rows.Scan(&employee.ID, &employee.Firstname, &employee.Lastname, &employee.Gender, &employee.Birthdate, &employee.Address, employee.Password)
+		rows.Scan(&employee.ID, &employee.Firstname, &employee.Lastname, &employee.Gender, &employee.Birthdate, &employee.Address, &employee.Password)
 		employees = append(employees, employee)
 	}
 
-	return 200, employees
+	return http.StatusOK, employees
+}
+
+func (service *employeeService)  GetEmployeeById(employee_id string) (int, interface{}) {
+	db, err := config.OpenConnection()
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadGateway,
+			Error: "can't open db connection",
+		}
+		return http.StatusBadGateway, response
+	}
+	defer db.Close()
+
+	// id, err := strconv.Atoi(employee_id)
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadRequest,
+			Error: "can't convert employee id",
+		}
+		return http.StatusBadRequest, response
+	}
+
+	row, err := db.Query(fmt.Sprintf("SELECT * FROM employees WHERE employee_id = %v", employee_id))
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadRequest,
+			Error: "can't get employee data",
+		}
+		return http.StatusBadRequest, response
+	}
+
+	var employee entity.Employee
+	isNotNull := row.Next()
+	if !isNotNull {
+		response := entity.Error {
+			Code: http.StatusNotFound,
+			Error: "no employee with given id",
+		}
+		return http.StatusNotFound, response	
+	}
+	row.Scan(&employee.ID, &employee.Firstname, &employee.Lastname, &employee.Gender, &employee.Birthdate, &employee.Address, &employee.Password)
+	
+	return http.StatusOK, employee
 }
 
 func (service *employeeService) Register(employee entity.Employee) (int, interface{}) {

@@ -29,6 +29,9 @@ func main() {
 	api.GET("/employees", func(c *gin.Context) {
 		employeeController.GetAllEmployees(c)
 	})
+	api.GET("/employees/:employee_id", func(c *gin.Context) {
+		employeeController.GetEmployeeById(c)
+	})
 	api.POST("/employees", func(c *gin.Context) {
 		employeeController.Register(c)
 	})
