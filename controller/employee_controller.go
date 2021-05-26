@@ -12,6 +12,7 @@ type EmployeeController interface {
 	Register(ctx *gin.Context)
 	GetEmployeeById(ctx *gin.Context)
 	DeleteEmployee(ctx *gin.Context)
+	Login(ctx *gin.Context)
 }
 
 type controller struct {
@@ -28,7 +29,6 @@ func (c *controller) GetAllEmployees(ctx *gin.Context) {
 	code, response := c.service.GetAllEmployees()
 
 	helper.WriteResponse(ctx, code, response)
-	return
 }
 
 func (c *controller) GetEmployeeById(ctx *gin.Context) {
@@ -36,7 +36,6 @@ func (c *controller) GetEmployeeById(ctx *gin.Context) {
 	code, response := c.service.GetEmployeeById(employeeId)
 
 	helper.WriteResponse(ctx, code, response)
-	return
 }
 
 func (c *controller) Register(ctx *gin.Context) {
@@ -45,7 +44,14 @@ func (c *controller) Register(ctx *gin.Context) {
 	code, response := c.service.Register(employee)
 
 	helper.WriteResponse(ctx, code, response)
-	return
+}
+
+func (c *controller) Login(ctx *gin.Context) {
+	var loginData entity.LoginEmployee
+	ctx.BindJSON(&loginData)
+	code, response := c.service.Login(loginData, ctx)
+
+	helper.WriteResponse(ctx, code, response)
 }
 
 func (c *controller) DeleteEmployee(ctx *gin.Context) {
@@ -53,5 +59,4 @@ func (c *controller) DeleteEmployee(ctx *gin.Context) {
 	code, response := c.service.DeleteEmployee(employeeId)
 
 	helper.WriteResponse(ctx, code, response)
-	return
 }

@@ -3,17 +3,21 @@ package service
 import (
 	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"github.com/ryanadiputraa/pawn-shop/config"
 	"github.com/ryanadiputraa/pawn-shop/entity"
-	"golang.org/x/crypto/bcrypt"
 )
-
+const SecretKey = "secret"
 type EmployeeService interface {
 	GetAllEmployees() (int, interface{})
 	GetEmployeeById(employee_id string) (int, interface{})
 	Register(entity.Employee) (int, interface{})
 	DeleteEmployee(employee_id string) (int, interface{})
+	Login(loginData entity.LoginEmployee, ctx *gin.Context) (int, interface{})
 }
 
 type employeeService struct {}
@@ -21,7 +25,6 @@ type employeeService struct {}
 func New() EmployeeService {
 	return &employeeService{}
 }
-
 
 func (service *employeeService) GetAllEmployees() (int, interface{}) {
 	db, err := config.OpenConnection()
@@ -102,18 +105,18 @@ func (service *employeeService) Register(employee entity.Employee) (int, interfa
 	}
 	defer db.Close()
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(employee.Password), bcrypt.DefaultCost)
-	if err != nil {
-		response := entity.Error {
-			Code: http.StatusBadRequest,
-			Error: "can't hash user password",
-		}
-		return http.StatusInternalServerError, response
-	}
+	// hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(employee.Password), 14)
+	// if err != nil {
+	// 	response := entity.Error {
+	// 		Code: http.StatusBadRequest,
+	// 		Error: "can't hash user password",
+	// 	}
+	// 	return http.StatusInternalServerError, response
+	// }
 
 	query := `INSERT INTO employees (firstname, lastname, gender, birthdate, address, password) VALUES ($1, $2, $3, $4, $5, $6)`
 	
-	_, err = db.Exec(query, employee.Firstname, employee.Lastname, employee.Gender, employee.Birthdate, employee.Address, hashedPassword)
+	_, err = db.Exec(query, employee.Firstname, employee.Lastname, employee.Gender, employee.Birthdate, employee.Address, employee.Password)
 	if err != nil {
 		response := entity.Error {
 			Code: http.StatusBadRequest,
@@ -123,9 +126,74 @@ func (service *employeeService) Register(employee entity.Employee) (int, interfa
 	}
 
 	response := entity.HTTPCode {
-		Code: http.StatusAccepted,
+		Code: http.StatusCreated,
 	}
 	return http.StatusCreated, response
+}
+
+func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.Context) (int, interface{}) {
+	db, err := config.OpenConnection()
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadGateway,
+			Error: "can't open db connection",
+		}
+		return http.StatusBadGateway, response
+	}
+	defer db.Close()
+	
+	// check employee id
+	row, err := db.Query(fmt.Sprintf("SELECT employee_id, password FROM employees WHERE employee_id = %v", strconv.Itoa(loginData.ID)))
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadRequest,
+			Error: "can't get employee data",
+		}
+		return http.StatusBadRequest, response
+	}
+	defer row.Close()
+
+	var employee entity.LoginEmployee
+	for row.Next() {
+		row.Scan(&employee.ID, &employee.Password)
+		if employee.ID == 0 {
+			response := entity.Error {
+				Code: http.StatusNotFound,
+				Error: "no employee with given id",
+			}
+			return http.StatusNotFound, response	
+		}
+	}
+	
+	// check employee password
+	// if err = bcrypt.CompareHashAndPassword(employee.Password, []byte(loginData.Password)); err != nil {
+	if (employee.Password != loginData.Password) {
+		response := entity.Error {
+			Code: http.StatusUnauthorized,
+			Error: "wrong password",
+		}
+		fmt.Println(employee.ID)
+		return http.StatusUnauthorized, response	
+	}
+
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer: strconv.Itoa(employee.ID),
+		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	token, err := claims.SignedString([]byte(config.GetSecretKey()))
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusInternalServerError,
+			Error: "can't generate token",
+		}
+		return http.StatusInternalServerError, response
+	}
+
+	ctx.SetCookie("jwt", token, 60*60*24, "/dashboard", "http://localhost:3000", false, true)
+	response := entity.HTTPCode { Code: http.StatusAccepted }
+
+	return http.StatusAccepted, response
 }
 
 func (service *employeeService) DeleteEmployee(employee_id string) (int, interface{}) {
