@@ -35,6 +35,9 @@ func main() {
 	api.POST("/employees", func(c *gin.Context) {
 		employeeController.Register(c)
 	})
+	api.DELETE("/employees/:employee_id", func(c *gin.Context) {
+		employeeController.DeleteEmployee(c)
+	})
 
 	port := os.Getenv("PORT")
 	if port == "" { port = "8000" }

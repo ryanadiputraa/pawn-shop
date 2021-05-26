@@ -2,5 +2,5 @@ package entity
 
 type Error struct {
 	Code	int 	`json:"code"`
-	Error string	`json:"message"`
+	Error string	`json:"error"`
 }

@@ -13,6 +13,7 @@ type EmployeeService interface {
 	GetAllEmployees() (int, interface{})
 	GetEmployeeById(employee_id string) (int, interface{})
 	Register(entity.Employee) (int, interface{})
+	DeleteEmployee(employee_id string) (int, interface{})
 }
 
 type employeeService struct {}
@@ -43,6 +44,7 @@ func (service *employeeService) GetAllEmployees() (int, interface{}) {
 		}
 		return http.StatusBadRequest, response
 	}
+	defer rows.Close()
 
 	var employees []entity.Employee
 	for rows.Next() {
@@ -65,15 +67,6 @@ func (service *employeeService)  GetEmployeeById(employee_id string) (int, inter
 	}
 	defer db.Close()
 
-	// id, err := strconv.Atoi(employee_id)
-	if err != nil {
-		response := entity.Error {
-			Code: http.StatusBadRequest,
-			Error: "can't convert employee id",
-		}
-		return http.StatusBadRequest, response
-	}
-
 	row, err := db.Query(fmt.Sprintf("SELECT * FROM employees WHERE employee_id = %v", employee_id))
 	if err != nil {
 		response := entity.Error {
@@ -82,6 +75,7 @@ func (service *employeeService)  GetEmployeeById(employee_id string) (int, inter
 		}
 		return http.StatusBadRequest, response
 	}
+	defer row.Close()
 
 	var employee entity.Employee
 	isNotNull := row.Next()
@@ -132,4 +126,29 @@ func (service *employeeService) Register(employee entity.Employee) (int, interfa
 		Code: http.StatusAccepted,
 	}
 	return http.StatusCreated, response
+}
+
+func (service *employeeService) DeleteEmployee(employee_id string) (int, interface{}) {
+	db, err := config.OpenConnection()
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadGateway,
+			Error: "can't open db connection",
+		}
+		return http.StatusBadGateway, response
+	}
+	defer db.Close()
+
+	_, err = db.Query(fmt.Sprintf("DELETE FROM employees WHERE employee_id = %v", employee_id))
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusNotFound,
+			Error: "no employee with given id",
+		}
+		return http.StatusNotFound, response
+	}
+
+	response := entity.HTTPCode { Code: http.StatusOK }
+
+	return http.StatusOK, response
 }
