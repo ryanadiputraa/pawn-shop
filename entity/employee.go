@@ -7,7 +7,7 @@ type Employee struct {
 	Gender 		string 	`json:"gender"`
 	Birthdate 	string 	`json:"birthdate"`
 	Address 	string 	`json:"address"`
-	Password 	string 	`json:"password"`
+	Password 	[]byte 	`json:"password"`
 }
 
 type EmployeesResponse struct {
