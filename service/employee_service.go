@@ -9,21 +9,47 @@ import (
 )
 
 type EmployeeService interface {
-	GetAllEmployees() entity.EmployeesResponse
+	GetAllEmployees() (int, interface{})
 	Register(entity.Employee) (int, interface{})
 }
 
-type employeeService struct {
-	employees entity.EmployeesResponse
-}
+type employeeService struct {}
 
 func New() EmployeeService {
 	return &employeeService{}
 }
 
 
-func (service *employeeService) GetAllEmployees() entity.EmployeesResponse {
-	return service.employees
+func (service *employeeService) GetAllEmployees() (int, interface{}) {
+	db, err := config.OpenConnection()
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadGateway,
+			Error: "can't open db connection",
+		}
+		return http.StatusBadGateway, response
+	}
+	defer db.Close()
+
+	query := `SELECT * FROM employees`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadRequest,
+			Error: "can't get employees data",
+		}
+		return http.StatusBadRequest, response
+	}
+
+	var employees []entity.Employee
+	for rows.Next() {
+		var employee entity.Employee
+		rows.Scan(&employee.ID, &employee.Firstname, &employee.Lastname, &employee.Gender, &employee.Birthdate, &employee.Address, employee.Password)
+		employees = append(employees, employee)
+	}
+
+	return 200, employees
 }
 
 func (service *employeeService) Register(employee entity.Employee) (int, interface{}) {

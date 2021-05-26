@@ -9,6 +9,7 @@ import (
 type EmployeeController interface {
 	GetAllEmployees(ctx *gin.Context)
 	Register(ctx *gin.Context)
+	GetEmployeeById(ctx *gin.Context)
 }
 
 type controller struct {
@@ -21,9 +22,17 @@ func New(service service.EmployeeService) EmployeeController {
 	}
 }
 
-func (c *controller) GetAllEmployees(ctx *gin.Context){
-	c.service.GetAllEmployees()
+func (c *controller) GetAllEmployees(ctx *gin.Context) {
+	code, response := c.service.GetAllEmployees()
+
+	ctx.Header("Content-Type", "application/json")
+	ctx.Header("Access-Control-Allow-Origin", "*")
+	ctx.JSON(code, response)
 	return
+}
+
+func (c *controller) GetEmployeeById(ctx *gin.Context) {
+
 }
 
 func (c *controller) Register(ctx *gin.Context){
@@ -31,6 +40,8 @@ func (c *controller) Register(ctx *gin.Context){
 	ctx.BindJSON(&employee)
 	code, response := c.service.Register(employee)
 
+	ctx.Header("Content-Type", "application/json")
+	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(code, response)
 	return
 }

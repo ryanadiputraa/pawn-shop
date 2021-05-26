@@ -9,8 +9,3 @@ type Employee struct {
 	Address 	string 	`json:"address"`
 	Password 	[]byte 	`json:"password"`
 }
-
-type EmployeesResponse struct {
-	Code	int			`json:"code"`
-	Data	[]Employee	`json:"data"`
-}
