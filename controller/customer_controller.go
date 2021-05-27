@@ -25,7 +25,7 @@ func NewCustomerController(service service.CustomerService) CustomerController {
 }
 
 func (c *customerContoller) GetAllCustomer(ctx *gin.Context) {
-	code, response := c.service.GetAllCustomer()
+	code, response := c.service.GetAllCustomer(ctx)
 
 	helper.WriteResponse(ctx, code, response)
 }

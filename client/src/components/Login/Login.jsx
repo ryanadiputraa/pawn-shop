@@ -12,6 +12,7 @@ import Container from "@material-ui/core/Container";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import LockIcon from "@material-ui/icons/Lock";
 import { useState } from "react";
+import { Redirect } from "react-router";
 
 const useStyles = makeStyles({
     card: {
@@ -42,23 +43,25 @@ export default function Login() {
     const classes = useStyles();
     const [employeeId, setEmployeeId] = useState("");
     const [password, setPassword] = useState("");
+    const [redirect, setRedirect] = useState(false);
 
     const handleLogin = async (event) => {
         event.preventDefault();
-        try {
-            await fetch("http://localhost:8000/api/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({
-                    id: parseInt(employeeId),
-                    password: password,
-                }),
-            });
-        } catch (err) {
-            console.log(err);
-        }
+
+        await fetch("http://localhost:8000/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+                id: parseInt(employeeId),
+                password: password,
+            }),
+        });
+
+        setRedirect(true);
     };
+
+    if (redirect) return <Redirect to="/dashboard" />;
 
     return (
         <Container>

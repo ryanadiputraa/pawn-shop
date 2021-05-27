@@ -5,13 +5,15 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/ryanadiputraa/pawn-shop/config"
 	"github.com/ryanadiputraa/pawn-shop/entity"
 )
 
 type CustomerService interface {
-	GetAllCustomer() (int, interface{})
+	GetAllCustomer(ctx *gin.Context) (int, interface{})
 	CreateLoan(entity.Customer) (int, interface{})
 	PayOffLoan(customerId string) (int, interface{})
 }
@@ -22,7 +24,28 @@ func NewCustomerService() CustomerService {
 	return &customerService{}
 }
 
-func (service *customerService) GetAllCustomer() (int, interface{}) {
+func (service *customerService) GetAllCustomer(ctx *gin.Context) (int, interface{}) {
+	// authenticate
+	cookie, err := ctx.Cookie("jwt")
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusUnauthorized,
+			Error: "no cookie found",
+		}
+		return http.StatusUnauthorized, response
+	}
+
+	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return []byte(config.GetSecretKey()), nil
+	})
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusUnauthorized,
+			Error: "unauthorized",
+		}
+		return http.StatusUnauthorized, response
+	}
+
 	db, err := config.OpenConnection()
 	if err != nil {
 		response := entity.Error {
