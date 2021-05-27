@@ -45,6 +45,16 @@ func main() {
 		employeeController.Login(c)
 	})
 
+	api.GET("/customers" , func(c *gin.Context) {
+		customerContoller.GetAllCustomer(c)
+	})
+	api.POST("/customers" , func(c *gin.Context) {
+		customerContoller.CreateLoan(c)
+	})
+	api.PUT("/customers/:customer_id", func(c *gin.Context) {
+		customerContoller.PayOffLoan(c)
+	})
+
 	port := os.Getenv("PORT")
 	if port == "" { port = "8000" }
 	

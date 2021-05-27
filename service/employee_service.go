@@ -59,7 +59,7 @@ func (service *employeeService) GetAllEmployees() (int, interface{}) {
 	return http.StatusOK, employees
 }
 
-func (service *employeeService)  GetEmployeeById(employee_id string) (int, interface{}) {
+func (service *employeeService) GetEmployeeById(employee_id string) (int, interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
 		response := entity.Error {

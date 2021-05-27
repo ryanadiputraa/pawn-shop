@@ -7,7 +7,7 @@ type Customer struct {
 	Gender			string	`json:"gender"`
 	Contact			string 	`json:"contact"`
 	Loan			int		`json:"loan"`
-	Interest		int		`json:"interst"`
+	Interest		int		`json:"interest"`
 	InsuranceItem	string	`json:"insuranceItem"`
 	ItemStatus		string	`json:"itemStatus"`
 }	
