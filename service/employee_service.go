@@ -149,6 +149,7 @@ func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.C
 			Code: http.StatusBadRequest,
 			Error: "can't get employee data",
 		}
+		fmt.Println(loginData.ID)
 		return http.StatusBadRequest, response
 	}
 	defer row.Close()
@@ -172,7 +173,6 @@ func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.C
 			Code: http.StatusUnauthorized,
 			Error: "wrong password",
 		}
-		fmt.Println(employee.ID)
 		return http.StatusUnauthorized, response	
 	}
 
@@ -190,7 +190,7 @@ func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.C
 		return http.StatusInternalServerError, response
 	}
 
-	ctx.SetCookie("jwt", token, 60*60*24, "/dashboard", "http://localhost:3000", false, true)
+	ctx.SetCookie("jwt", token, 60*60*24, "", "", true, true)
 	response := entity.HTTPCode { Code: http.StatusAccepted }
 
 	return http.StatusAccepted, response

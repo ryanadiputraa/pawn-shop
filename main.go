@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/ryanadiputraa/pawn-shop/controller"
+	"github.com/ryanadiputraa/pawn-shop/middlewares"
 	"github.com/ryanadiputraa/pawn-shop/service"
 )
 
@@ -26,7 +27,10 @@ func init() {
 }
 
 func main() {
-	r := gin.Default()
+	r := gin.New()
+
+	r.Use(gin.Recovery(), gin.Logger(), middlewares.CORSMiddleware())
+
 	api := r.Group("/api")
 
 	api.GET("/employees", func(c *gin.Context) {
