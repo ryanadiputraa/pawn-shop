@@ -1,10 +1,19 @@
-import { CircularProgress, Container, Typography } from "@material-ui/core";
+import {
+    CircularProgress,
+    Container,
+    InputAdornment,
+    TextField,
+    Typography,
+} from "@material-ui/core";
 import { useState } from "react";
 import { useEffect } from "react";
 import { Redirect } from "react-router";
 import DataTable from "../Table/DataTable";
+import dashboardStyle from "./dashboard";
+import SearchIcon from "@material-ui/icons/Search";
 
 export default function Dashboard() {
+    const classes = dashboardStyle();
     const [redirect, setRedirect] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [tableData, setTableData] = useState([]);
@@ -31,9 +40,58 @@ export default function Dashboard() {
 
     return (
         <Container>
-            <Typography variant="h4" component="h1" align="center" gutterBottom>
+            <Typography
+                className={classes.title}
+                variant="h3"
+                component="h1"
+                align="center"
+                color="primary"
+                gutterBottom
+            >
                 PEGADAIAN
             </Typography>
+            <Typography
+                className={classes.subTitle}
+                variant="h5"
+                component="h2"
+                align="center"
+                gutterBottom
+            >
+                Sistem Informasi Pegadaian
+            </Typography>
+            <div className={classes.tableTitle}>
+                {tableData.length && tableData[0].customerId ? (
+                    <Typography
+                        className={classes.dataTitle}
+                        variant="h6"
+                        component="h5"
+                        align="left"
+                    >
+                        Data Nasabah
+                    </Typography>
+                ) : (
+                    <Typography
+                        className={classes.dataTitle}
+                        variant="h6"
+                        component="h5"
+                        align="left"
+                    >
+                        Data Karyawan
+                    </Typography>
+                )}
+                <TextField
+                    className={classes.search}
+                    label="Cari..."
+                    type="text"
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+            </div>
             {isLoading ? <CircularProgress /> : <DataTable data={tableData} />}
         </Container>
     );

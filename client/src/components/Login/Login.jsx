@@ -4,7 +4,6 @@ import {
     CardContent,
     Grid,
     InputAdornment,
-    makeStyles,
     TextField,
     Typography,
 } from "@material-ui/core";
@@ -13,34 +12,10 @@ import AccountCircle from "@material-ui/icons/AccountCircle";
 import LockIcon from "@material-ui/icons/Lock";
 import { useState } from "react";
 import { Redirect } from "react-router";
-
-const useStyles = makeStyles({
-    card: {
-        minWidth: 275,
-        marginTop: 80,
-    },
-    title: {
-        textAlign: "center",
-    },
-    loginForm: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: 40,
-    },
-    input: {
-        margin: (0, 10),
-        width: "100%",
-        minWidth: 260,
-    },
-    loginButton: {
-        marginTop: 20,
-        alignSelf: "flex-end",
-    },
-});
+import loginStyle from "./loginStyle";
 
 export default function Login() {
-    const classes = useStyles();
+    const classes = loginStyle();
     const [employeeId, setEmployeeId] = useState("");
     const [password, setPassword] = useState("");
     const [redirect, setRedirect] = useState(false);
