@@ -11,35 +11,62 @@ import { Redirect } from "react-router";
 import DataTable from "../Table/DataTable";
 import dashboardStyle from "./dashboard";
 import SearchIcon from "@material-ui/icons/Search";
+import EmployeeTable from "../EmployeeTable/EmployeeTable";
 
-export default function Dashboard() {
+export default function Dashboard(props) {
     const classes = dashboardStyle();
     const [redirect, setRedirect] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [tableData, setTableData] = useState([]);
 
-    useEffect(() => {
-        const fetchCustomers = async () => {
-            setIsLoading(true);
-            const res = await fetch("http://localhost:8000/api/customers", {
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-            });
-            const data = await res.json();
-            setTableData(data);
+    const params = new URLSearchParams(props.location.search);
+    const role = params.get("role");
 
-            // unauthorized user
-            if (data.code === 401) setRedirect(true);
+    useEffect(() => {
+        const abortCont = new AbortController();
+
+        const fetchTableData = async () => {
+            setIsLoading(true);
+
+            if (role === "manager") {
+                const res = await fetch(`http://localhost:8000/api/employees`, {
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                });
+                const data = await res.json();
+                setTableData(data);
+
+                if (data.code === 401) setRedirect(true);
+            } else if (role === "employee") {
+                const res = await fetch(`http://localhost:8000/api/customers`, {
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                });
+                const data = await res.json();
+
+                setTableData(data);
+                if (data.code === 401) setRedirect(true);
+            }
 
             setIsLoading(false);
         };
-        fetchCustomers();
-    }, []);
+
+        fetchTableData();
+
+        return () => abortCont.abort();
+    }, [role]);
 
     if (redirect) return <Redirect to="/" />;
 
+    const renderDashboard = (tableData) => {
+        if (role === "manager") return <EmployeeTable data={tableData} />;
+        else if (role === "employee") return <DataTable data={tableData} />;
+        else return <Redirect to="/" />;
+    };
+
     return (
         <Container>
+            <a href="/">Logout</a>
             <Typography
                 className={classes.title}
                 variant="h3"
@@ -60,7 +87,7 @@ export default function Dashboard() {
                 Sistem Informasi Pegadaian
             </Typography>
             <div className={classes.tableTitle}>
-                {tableData.length && tableData[0].customerId ? (
+                {role === "employee" ? (
                     <Typography
                         className={classes.dataTitle}
                         variant="h6"
@@ -92,7 +119,7 @@ export default function Dashboard() {
                     }}
                 />
             </div>
-            {isLoading ? <CircularProgress /> : <DataTable data={tableData} />}
+            {isLoading ? <CircularProgress /> : renderDashboard(tableData)}
         </Container>
     );
 }

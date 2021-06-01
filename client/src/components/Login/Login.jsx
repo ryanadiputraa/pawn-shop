@@ -2,11 +2,16 @@ import {
     Button,
     Card,
     CardContent,
+    FormControl,
+    FormLabel,
+    FormControlLabel,
     Grid,
     InputAdornment,
+    RadioGroup,
     TextField,
     Typography,
 } from "@material-ui/core";
+import Radio from "@material-ui/core/Radio";
 import Container from "@material-ui/core/Container";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import LockIcon from "@material-ui/icons/Lock";
@@ -16,14 +21,15 @@ import loginStyle from "./loginStyle";
 
 export default function Login() {
     const classes = loginStyle();
-    const [employeeId, setEmployeeId] = useState("");
+    const [employeeId, setEmployeeId] = useState("asdasda");
     const [password, setPassword] = useState("");
     const [redirect, setRedirect] = useState(false);
+    const [role, setRole] = useState("employee");
 
     const handleLogin = async (event) => {
         event.preventDefault();
 
-        await fetch("http://localhost:8000/api/login", {
+        const res = await fetch("http://localhost:8000/api/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -32,24 +38,25 @@ export default function Login() {
                 password: password,
             }),
         });
+        const data = await res.json();
 
-        setRedirect(true);
+        if (data.code === 202) setRedirect(true);
+        else setRedirect(false);
     };
 
-    if (redirect) return <Redirect to="/dashboard" />;
+    if (redirect) return <Redirect to={"/dashboard?role=" + role} />;
 
     return (
         <Container>
             <Grid container>
                 <Grid item xs={3}></Grid>
                 <Grid item xs={6}>
-                    <Card className={classes.card}>
+                    <Card className={classes.card} elevation={3}>
                         <CardContent>
                             <Typography
                                 className={classes.title}
                                 color="textPrimary"
                                 variant="h4"
-                                gutterBottom
                             >
                                 Login
                             </Typography>
@@ -62,7 +69,11 @@ export default function Login() {
                                 <TextField
                                     className={classes.input}
                                     type="number"
-                                    label="ID Karyawan"
+                                    label={
+                                        role === "employee"
+                                            ? "ID Karyawan"
+                                            : "ID Manager"
+                                    }
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -89,6 +100,34 @@ export default function Login() {
                                         setPassword(event.target.value)
                                     }
                                 />
+                                <FormControl
+                                    component="fieldset"
+                                    className={classes.role}
+                                >
+                                    <FormLabel component="legend">
+                                        Masuk Sebagai
+                                    </FormLabel>
+                                    <RadioGroup
+                                        className={classes.roleSelect}
+                                        aria-label="role"
+                                        name="role"
+                                        value={role}
+                                        onChange={(event) =>
+                                            setRole(event.target.value)
+                                        }
+                                    >
+                                        <FormControlLabel
+                                            value="manager"
+                                            control={<Radio />}
+                                            label="Manager"
+                                        />
+                                        <FormControlLabel
+                                            value="employee"
+                                            control={<Radio />}
+                                            label="Karyawan"
+                                        />
+                                    </RadioGroup>
+                                </FormControl>
                                 <Button
                                     className={classes.loginButton}
                                     variant="contained"
