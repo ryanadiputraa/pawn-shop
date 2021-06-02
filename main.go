@@ -17,7 +17,7 @@ var (
 	employeeController controller.EmployeeController = controller.NewEmployeeController(employeeService)
 	customerService service.CustomerService = service.NewCustomerService()
 	customerContoller controller.CustomerController = controller.NewCustomerController(customerService)
-
+	imageController controller.ImageController = controller.NewImageController()
 )
 
 func init() {
@@ -60,6 +60,10 @@ func main() {
 	})
 	api.PUT("/customers/:customer_id", func(c *gin.Context) {
 		customerContoller.PayOffLoan(c)
+	})
+
+	r.GET("/:image_path", func(c *gin.Context) {
+		imageController.ServeImage(c)
 	})
 
 	port := os.Getenv("PORT")
