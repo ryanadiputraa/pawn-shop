@@ -18,6 +18,9 @@ import EmployeeTable from "../EmployeeTable/EmployeeTable";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import Alert from "@material-ui/lab/Alert";
 import CloseIcon from "@material-ui/icons/Close";
+import Fab from "@material-ui/core/Fab";
+import AddIcon from "@material-ui/icons/Add";
+import CustomerModal from "../CustomerModal/CustomerModal";
 
 export default function Dashboard(props) {
     const classes = dashboardStyle();
@@ -25,6 +28,7 @@ export default function Dashboard(props) {
     const [isLoading, setIsLoading] = useState(false);
     const [tableData, setTableData] = useState([]);
     const [isNotFound, setIsNotFound] = useState(false);
+    const [openModal, setOpenModal] = useState(true);
 
     const params = new URLSearchParams(props.location.search);
     const role = params.get("role");
@@ -47,6 +51,7 @@ export default function Dashboard(props) {
                 credentials: "include",
             });
             const data = await res.json();
+            console.log(data);
 
             setTableData(data);
             if (data.code === 401) setRedirect(true);
@@ -188,6 +193,15 @@ export default function Dashboard(props) {
                 </Alert>
             </Collapse>
             {isLoading ? <CircularProgress /> : renderDashboard(tableData)}
+            <Fab
+                className={classes.fabAdd}
+                onClick={() => setOpenModal(true)}
+                color="primary"
+                aria-label="add"
+            >
+                <AddIcon />
+            </Fab>
+            <CustomerModal openModal={openModal} setOpenModal={setOpenModal} />
         </Container>
     );
 }

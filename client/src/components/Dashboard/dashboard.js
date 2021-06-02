@@ -29,6 +29,11 @@ const dashboardStyle = makeStyles((theme) => ({
         position: "relative",
         top: "15px",
     },
+    fabAdd: {
+        position: "absolute",
+        bottom: "8%",
+        right: "3%",
+    },
 }));
 
 export default dashboardStyle;

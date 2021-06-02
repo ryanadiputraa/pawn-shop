@@ -2,11 +2,18 @@ package service
 
 import (
 	"fmt"
-	"net/http"
+	"os"
 	"strconv"
+
+	// "io"
+	"net/http"
+	// "os"
+
+	// "strconv"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+
 	"github.com/google/uuid"
 	"github.com/ryanadiputraa/pawn-shop/config"
 	"github.com/ryanadiputraa/pawn-shop/entity"
@@ -14,7 +21,7 @@ import (
 
 type CustomerService interface {
 	GetAllCustomer(ctx *gin.Context) (int, interface{})
-	CreateLoan(entity.Customer) (int, interface{})
+	CreateLoan(ctx *gin.Context) (int, interface{})
 	PayOffLoan(customerId string) (int, interface{})
 }
 
@@ -59,9 +66,9 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (int, interface
 	var query string
 	URLQueryParam := ctx.Request.URL.Query()
 	if len(URLQueryParam) != 0 {
-		query = fmt.Sprintf("SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id WHERE LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%')", URLQueryParam["name"][0], URLQueryParam["name"][0])
+		query = fmt.Sprintf("SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status, image FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id WHERE LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%')", URLQueryParam["name"][0], URLQueryParam["name"][0])
 	} else {
-		query = `SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id`
+		query = `SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status, image FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id`
 	}
 
 	rows, err := db.Query(query)
@@ -77,7 +84,7 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (int, interface
 	var customers []entity.Customer
 	for rows.Next() {
 		var customer entity.Customer
-		rows.Scan(&customer.CustomerId, &customer.Firstname, &customer.Lastname, &customer.Gender, &customer.Contact, &customer.Loan, &customer.Interest, &customer.InsuranceItem, &customer.ItemStatus)
+		rows.Scan(&customer.CustomerId, &customer.Firstname, &customer.Lastname, &customer.Gender, &customer.Contact, &customer.Loan, &customer.Interest, &customer.InsuranceItem, &customer.ItemStatus, &customer.Image)
 		customers = append(customers, customer)
 	}
 	defer rows.Close()
@@ -92,7 +99,7 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (int, interface
 	return http.StatusOK, customers
 }
 
-func (service *customerService) CreateLoan(customer entity.Customer) (int, interface{}) {
+func (service *customerService) CreateLoan(ctx *gin.Context) (int, interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
 		response := entity.Error {
@@ -102,6 +109,42 @@ func (service *customerService) CreateLoan(customer entity.Customer) (int, inter
 		return http.StatusBadGateway, response
 	}
 	defer db.Close()
+
+	file, err := ctx.FormFile("upload")
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadRequest,
+			Error: err.Error(),
+		}
+		return http.StatusBadRequest, response
+	}
+
+	err = ctx.SaveUploadedFile(file, "./uploads/"+file.Filename)
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadRequest,
+			Error: err.Error(),
+		}
+		return http.StatusBadRequest, response
+	}
+
+	var customer entity.Customer
+	customer.Firstname = ctx.Request.FormValue("firstname")
+	customer.Lastname = ctx.Request.FormValue("lastname")
+	customer.Gender = ctx.Request.FormValue("gender")
+	customer.Contact = ctx.Request.FormValue("contact")
+	customer.Loan, err = strconv.Atoi(ctx.Request.FormValue("loan"))
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadRequest,
+			Error: err.Error(),
+		}
+		return http.StatusBadRequest, response
+	}
+	customer.Interest = customer.Loan / 10
+	customer.InsuranceItem = ctx.Request.FormValue("insuranceItem")
+	customer.ItemStatus = "jaminan"
+	customer.Image = fmt.Sprintf("%v/%v", os.Getenv("BASE_URL"), file.Filename)
 
 	loan_id, err := uuid.NewUUID()
 	if err != nil {
@@ -128,13 +171,12 @@ func (service *customerService) CreateLoan(customer entity.Customer) (int, inter
 		return http.StatusInternalServerError, response
 	}
 
-	query := `INSERT INTO insurance_items (item_id, item_name, status) VALUES ($1, $2, $3)`
-	_, err = db.Exec(query, item_id, customer.InsuranceItem, "jaminan")
+	query := `INSERT INTO insurance_items (item_id, item_name, image, status) VALUES ($1, $2, $3, $4)`
+	_, err = db.Exec(query, item_id, customer.InsuranceItem, customer.Image, "jaminan")
 	if err != nil {
 		response := entity.Error {
 			Code: http.StatusBadRequest,
-			// Error: "fail to insert insurance item",
-			Error: err.Error(),
+			Error: "fail to insert insurance item",
 		}
 		return http.StatusBadRequest, response	
 	}
@@ -159,9 +201,9 @@ func (service *customerService) CreateLoan(customer entity.Customer) (int, inter
 		return http.StatusBadRequest, response	
 	}	
 
-	response := entity.HTTPCode { Code: http.StatusOK }
+	response := entity.HTTPCode { Code: http.StatusCreated }
 
-	return http.StatusOK, response
+	return http.StatusCreated, response
 }
 
 func (service *customerService) PayOffLoan(customerId string) (int, interface{}) {

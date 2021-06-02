@@ -2,7 +2,6 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ryanadiputraa/pawn-shop/entity"
 	"github.com/ryanadiputraa/pawn-shop/helper"
 	"github.com/ryanadiputraa/pawn-shop/service"
 )
@@ -31,9 +30,7 @@ func (c *customerContoller) GetAllCustomer(ctx *gin.Context) {
 }
 
 func (c *customerContoller) CreateLoan(ctx *gin.Context) {
-	var customer entity.Customer
-	ctx.BindJSON(&customer)
-	code, response := c.service.CreateLoan(customer)
+	code, response := c.service.CreateLoan(ctx)
 
 	helper.WriteResponse(ctx, code, response)
 }

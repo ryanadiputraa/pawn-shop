@@ -10,4 +10,5 @@ type Customer struct {
 	Interest		int		`json:"interest"`
 	InsuranceItem	string	`json:"insuranceItem"`
 	ItemStatus		string	`json:"itemStatus"`
+	Image			string	`json:"image"`
 }	
