@@ -10,6 +10,8 @@ import {
     RadioGroup,
     TextField,
     Typography,
+    Collapse,
+    IconButton,
 } from "@material-ui/core";
 import Radio from "@material-ui/core/Radio";
 import Container from "@material-ui/core/Container";
@@ -18,6 +20,8 @@ import LockIcon from "@material-ui/icons/Lock";
 import { useState } from "react";
 import { Redirect } from "react-router";
 import loginStyle from "./loginStyle";
+import Alert from "@material-ui/lab/Alert";
+import CloseIcon from "@material-ui/icons/Close";
 
 export default function Login() {
     const classes = loginStyle();
@@ -25,6 +29,7 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [redirect, setRedirect] = useState(false);
     const [role, setRole] = useState("employee");
+    const [isError, setIsError] = useState(false);
 
     const handleLogin = async (event) => {
         event.preventDefault();
@@ -40,8 +45,13 @@ export default function Login() {
         });
         const data = await res.json();
 
-        if (data.code === 202) setRedirect(true);
-        else setRedirect(false);
+        if (data.code === 202) {
+            setRedirect(true);
+            setIsError(false);
+        } else {
+            setRedirect(false);
+            setIsError(true);
+        }
     };
 
     if (redirect) return <Redirect to={"/dashboard?role=" + role} />;
@@ -60,6 +70,24 @@ export default function Login() {
                             >
                                 Login
                             </Typography>
+                            <Collapse in={isError}>
+                                <Alert
+                                    severity="error"
+                                    action={
+                                        <IconButton
+                                            aria-label="close"
+                                            color="inherit"
+                                            size="small"
+                                            onClick={() => setIsError(false)}
+                                        >
+                                            <CloseIcon fontSize="inherit" />
+                                        </IconButton>
+                                    }
+                                >
+                                    Mohon periksa kembali ID dan Password yang
+                                    anda masukan!
+                                </Alert>
+                            </Collapse>
                             <form
                                 onSubmit={handleLogin}
                                 noValidate

@@ -8,6 +8,7 @@ const loginStyle = makeStyles((theme) => ({
     title: {
         textAlign: "center",
         marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
     },
     loginForm: {
         display: "flex",

@@ -13,7 +13,7 @@ import (
 )
 const SecretKey = "secret"
 type EmployeeService interface {
-	GetAllEmployees() (int, interface{})
+	GetAllEmployees(ctx *gin.Context) (int, interface{})
 	GetEmployeeById(employee_id string) (int, interface{})
 	Register(entity.Employee) (int, interface{})
 	Login(loginData entity.LoginEmployee, ctx *gin.Context) (int, interface{})
@@ -27,7 +27,7 @@ func NewEmployeeService() EmployeeService {
 	return &employeeService{}
 }
 
-func (service *employeeService) GetAllEmployees() (int, interface{}) {
+func (service *employeeService) GetAllEmployees(ctx *gin.Context) (int, interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
 		response := entity.Error {
@@ -38,7 +38,13 @@ func (service *employeeService) GetAllEmployees() (int, interface{}) {
 	}
 	defer db.Close()
 
-	query := `SELECT * FROM employees`
+	var query string
+	URLQueryParam := ctx.Request.URL.Query()
+	if len(URLQueryParam) != 0 {
+		query = fmt.Sprintf("SELECT * FROM employees WHERE LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%')", URLQueryParam["name"][0], URLQueryParam["name"][0])
+	} else {
+		query = `SELECT * FROM employees`
+	}
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -55,6 +61,14 @@ func (service *employeeService) GetAllEmployees() (int, interface{}) {
 		var employee entity.Employee
 		rows.Scan(&employee.ID, &employee.Firstname, &employee.Lastname, &employee.Gender, &employee.Birthdate, &employee.Address, &employee.Password)
 		employees = append(employees, employee)
+	}
+	defer rows.Close()
+	if employees == nil {
+		response := entity.Error {
+			Code: http.StatusNotFound,
+			Error: "no employee with given name",
+		}
+		return http.StatusNotFound, response
 	}
 
 	return http.StatusOK, employees

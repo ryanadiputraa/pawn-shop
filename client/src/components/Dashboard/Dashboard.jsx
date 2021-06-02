@@ -4,6 +4,8 @@ import {
     InputAdornment,
     TextField,
     Typography,
+    Collapse,
+    IconButton,
 } from "@material-ui/core";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -14,46 +16,82 @@ import dashboardStyle from "./dashboard";
 import SearchIcon from "@material-ui/icons/Search";
 import EmployeeTable from "../EmployeeTable/EmployeeTable";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+import Alert from "@material-ui/lab/Alert";
+import CloseIcon from "@material-ui/icons/Close";
 
 export default function Dashboard(props) {
     const classes = dashboardStyle();
     const [redirect, setRedirect] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [tableData, setTableData] = useState([]);
+    const [isNotFound, setIsNotFound] = useState(false);
 
     const params = new URLSearchParams(props.location.search);
     const role = params.get("role");
 
+    const fetchTableData = async (role) => {
+        setIsLoading(true);
+
+        if (role === "manager") {
+            const res = await fetch(`http://localhost:8000/api/employees`, {
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+            });
+            const data = await res.json();
+            setTableData(data);
+
+            if (data.code === 401) setRedirect(true);
+        } else if (role === "employee") {
+            const res = await fetch(`http://localhost:8000/api/customers`, {
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+            });
+            const data = await res.json();
+
+            setTableData(data);
+            if (data.code === 401) setRedirect(true);
+        }
+
+        setIsLoading(false);
+        setIsNotFound(false);
+    };
+
+    const handleSearch = async (event) => {
+        event.preventDefault();
+        const name = event.target.value;
+        if (name === "") {
+            fetchTableData(role);
+            return;
+        }
+
+        setIsLoading(true);
+        let endpoint;
+        if (role === "employee") {
+            endpoint = "customers";
+        } else if (role === "manager") {
+            endpoint = "employees";
+        }
+        const res = await fetch(
+            `http://localhost:8000/api/${endpoint}?name=${name}`,
+            {
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+            }
+        );
+        const data = await res.json();
+        setIsLoading(false);
+
+        if (!data.code) {
+            setTableData(data);
+            setIsNotFound(false);
+            return;
+        }
+        setIsNotFound(true);
+    };
+
     useEffect(() => {
         const abortCont = new AbortController();
-
-        const fetchTableData = async () => {
-            setIsLoading(true);
-
-            if (role === "manager") {
-                const res = await fetch(`http://localhost:8000/api/employees`, {
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                });
-                const data = await res.json();
-                setTableData(data);
-
-                if (data.code === 401) setRedirect(true);
-            } else if (role === "employee") {
-                const res = await fetch(`http://localhost:8000/api/customers`, {
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                });
-                const data = await res.json();
-
-                setTableData(data);
-                if (data.code === 401) setRedirect(true);
-            }
-
-            setIsLoading(false);
-        };
-
-        fetchTableData();
+        fetchTableData(role);
 
         return () => abortCont.abort();
     }, [role]);
@@ -120,6 +158,7 @@ export default function Dashboard(props) {
                 )}
                 <TextField
                     className={classes.search}
+                    onChange={(event) => handleSearch(event)}
                     label="Cari..."
                     type="text"
                     InputProps={{
@@ -131,6 +170,23 @@ export default function Dashboard(props) {
                     }}
                 />
             </div>
+            <Collapse in={isNotFound} className={classes.warning}>
+                <Alert
+                    severity="error"
+                    action={
+                        <IconButton
+                            aria-label="close"
+                            color="inherit"
+                            size="small"
+                            onClick={() => setIsNotFound(false)}
+                        >
+                            <CloseIcon fontSize="inherit" />
+                        </IconButton>
+                    }
+                >
+                    Tidak ada nama yang sesuai ditemukan!
+                </Alert>
+            </Collapse>
             {isLoading ? <CircularProgress /> : renderDashboard(tableData)}
         </Container>
     );

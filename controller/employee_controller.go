@@ -27,7 +27,7 @@ func NewEmployeeController(service service.EmployeeService) EmployeeController {
 }
 
 func (c *employeeController) GetAllEmployees(ctx *gin.Context) {
-	code, response := c.service.GetAllEmployees()
+	code, response := c.service.GetAllEmployees(ctx)
 
 	helper.WriteResponse(ctx, code, response)
 }

@@ -56,7 +56,13 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (int, interface
 	}
 	defer db.Close()
 
-	query := `SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id`
+	var query string
+	URLQueryParam := ctx.Request.URL.Query()
+	if len(URLQueryParam) != 0 {
+		query = fmt.Sprintf("SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id WHERE LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%')", URLQueryParam["name"][0], URLQueryParam["name"][0])
+	} else {
+		query = `SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id`
+	}
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -75,6 +81,13 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (int, interface
 		customers = append(customers, customer)
 	}
 	defer rows.Close()
+	if customers == nil {
+		response := entity.Error {
+			Code: http.StatusNotFound,
+			Error: "no customers with given name",
+		}
+		return http.StatusNotFound, response
+	}
 
 	return http.StatusOK, customers
 }

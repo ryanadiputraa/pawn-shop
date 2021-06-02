@@ -17,6 +17,9 @@ const dashboardStyle = makeStyles((theme) => ({
     subTitle: {
         marginBottom: theme.spacing(2),
     },
+    warning: {
+        marginBottom: theme.spacing(2),
+    },
     tableTitle: {
         marginBottom: theme.spacing(4),
         display: "flex",
