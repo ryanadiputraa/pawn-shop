@@ -21,6 +21,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 import CustomerModal from "../CustomerModal/CustomerModal";
+import PaymentModal from "../PaymentModal/PaymentModal";
 
 export default function Dashboard(props) {
     const classes = dashboardStyle();
@@ -28,7 +29,9 @@ export default function Dashboard(props) {
     const [isLoading, setIsLoading] = useState(false);
     const [tableData, setTableData] = useState([]);
     const [isNotFound, setIsNotFound] = useState(false);
-    const [openModal, setOpenModal] = useState(true);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
+    const [openPayment, setOpenPayment] = useState(true);
 
     const params = new URLSearchParams(props.location.search);
     const role = params.get("role");
@@ -192,6 +195,23 @@ export default function Dashboard(props) {
                     Tidak ada nama yang sesuai ditemukan!
                 </Alert>
             </Collapse>
+            <Collapse in={isSuccess} className={classes.warning}>
+                <Alert
+                    severity="success"
+                    action={
+                        <IconButton
+                            aria-label="close"
+                            color="inherit"
+                            size="small"
+                            onClick={() => setIsSuccess(false)}
+                        >
+                            <CloseIcon fontSize="inherit" />
+                        </IconButton>
+                    }
+                >
+                    Data berhasil ditambahkan!
+                </Alert>
+            </Collapse>
             {isLoading ? <CircularProgress /> : renderDashboard(tableData)}
             <Fab
                 className={classes.fabAdd}
@@ -201,7 +221,15 @@ export default function Dashboard(props) {
             >
                 <AddIcon />
             </Fab>
-            <CustomerModal openModal={openModal} setOpenModal={setOpenModal} />
+            <CustomerModal
+                openModal={openModal}
+                setOpenModal={setOpenModal}
+                setIsSuccess={setIsSuccess}
+            />
+            <PaymentModal
+                openPayment={openPayment}
+                setOpenPayment={setOpenPayment}
+            />
         </Container>
     );
 }

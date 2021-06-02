@@ -1,7 +1,9 @@
 import {
     Button,
+    Collapse,
     TextField,
     FormControl,
+    IconButton,
     FormLabel,
     RadioGroup,
     FormControlLabel,
@@ -10,10 +12,16 @@ import {
 import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
+import Alert from "@material-ui/lab/Alert";
+import CloseIcon from "@material-ui/icons/Close";
 import customerModalStyle from "./customerModalStyle";
 import { useState } from "react";
 
-export default function CustomerModal({ openModal, setOpenModal }) {
+export default function CustomerModal({
+    openModal,
+    setOpenModal,
+    setIsSuccess,
+}) {
     const classes = customerModalStyle();
     const [firstname, setFirstname] = useState("");
     const [lastname, setLastname] = useState("");
@@ -22,6 +30,7 @@ export default function CustomerModal({ openModal, setOpenModal }) {
     const [loan, setLoan] = useState("");
     const [insuranceItem, setInsuranceItem] = useState("");
     const [image, setImage] = useState("");
+    const [isAlert, setIsAlert] = useState(false);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -41,7 +50,16 @@ export default function CustomerModal({ openModal, setOpenModal }) {
             body: formData,
         });
         const data = await res.json();
-        console.log(data);
+
+        if (data.code === 201) {
+            window.location.reload();
+            setIsAlert(false);
+            setOpenModal(false);
+            setIsSuccess(true);
+        } else {
+            setIsAlert(true);
+            setIsSuccess(false);
+        }
     };
 
     return (
@@ -61,6 +79,23 @@ export default function CustomerModal({ openModal, setOpenModal }) {
                 <div className={classes.paper}>
                     <h2 id="transition-modal-title">Form Gadai Barang</h2>
                     <p>Masukan Data Nasabah</p>
+                    <Collapse in={isAlert} className={classes.warning}>
+                        <Alert
+                            severity="error"
+                            action={
+                                <IconButton
+                                    aria-label="close"
+                                    color="inherit"
+                                    size="small"
+                                    onClick={() => setIsAlert(false)}
+                                >
+                                    <CloseIcon fontSize="inherit" />
+                                </IconButton>
+                            }
+                        >
+                            Mohon Periksa Kembali data yang anda masukan!
+                        </Alert>
+                    </Collapse>
                     <form
                         encType="multipart/form-data"
                         onSubmit={handleSubmit}
