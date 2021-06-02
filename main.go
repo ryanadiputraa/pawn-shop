@@ -48,6 +48,9 @@ func main() {
 	api.POST("/login", func(c *gin.Context) {
 		employeeController.Login(c)
 	})
+	api.POST("/logout", func(c *gin.Context) {
+		employeeController.Logout(c)
+	})
 
 	api.GET("/customers" , func(c *gin.Context) {
 		customerContoller.GetAllCustomer(c)

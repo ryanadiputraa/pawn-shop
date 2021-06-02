@@ -13,6 +13,7 @@ type EmployeeController interface {
 	GetEmployeeById(ctx *gin.Context)
 	DeleteEmployee(ctx *gin.Context)
 	Login(ctx *gin.Context)
+	Logout(ctx *gin.Context)
 }
 
 type employeeController struct {
@@ -51,6 +52,11 @@ func (c *employeeController) Login(ctx *gin.Context) {
 	ctx.BindJSON(&loginData)
 	code, response := c.service.Login(loginData, ctx)
 
+	helper.WriteResponse(ctx, code, response)
+}
+
+func (c *employeeController) Logout(ctx *gin.Context) {
+	code, response := c.service.Logout(ctx)
 	helper.WriteResponse(ctx, code, response)
 }
 

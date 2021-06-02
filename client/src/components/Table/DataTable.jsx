@@ -8,6 +8,7 @@ import {
     TableHead,
     TableBody,
 } from "@material-ui/core";
+import tableStyle from "./tableStyle";
 
 const StyledTableCell = withStyles((theme) => ({
     head: {
@@ -48,6 +49,8 @@ const formatCurrency = (currency) => {
 };
 
 export default function DataTable({ data }) {
+    const classes = tableStyle();
+
     return (
         <TableContainer component={Paper}>
             <Table aria-label="data-table">
@@ -68,7 +71,10 @@ export default function DataTable({ data }) {
                 </TableHead>
                 <TableBody>
                     {data.map((d) => (
-                        <TableRow key={d.customerId}>
+                        <TableRow
+                            className={classes.dataRow}
+                            key={d.customerId}
+                        >
                             <TableCell component="th" scope="row">
                                 {`${d.firstname} ${d.lastname}`}
                             </TableCell>

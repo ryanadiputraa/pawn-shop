@@ -16,8 +16,9 @@ type EmployeeService interface {
 	GetAllEmployees() (int, interface{})
 	GetEmployeeById(employee_id string) (int, interface{})
 	Register(entity.Employee) (int, interface{})
-	DeleteEmployee(employee_id string) (int, interface{})
 	Login(loginData entity.LoginEmployee, ctx *gin.Context) (int, interface{})
+	Logout(ctx *gin.Context) (int, interface{})
+	DeleteEmployee(employee_id string) (int, interface{})
 }
 
 type employeeService struct {}
@@ -194,6 +195,12 @@ func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.C
 	response := entity.HTTPCode { Code: http.StatusAccepted }
 
 	return http.StatusAccepted, response
+}
+
+func (service *employeeService) Logout(ctx *gin.Context) (int, interface{}) {
+	ctx.SetCookie("jwt", "", 0, "", "", true, true)
+	response := entity.HTTPCode { Code: http.StatusOK }
+	return http.StatusOK, response
 }
 
 func (service *employeeService) DeleteEmployee(employee_id string) (int, interface{}) {

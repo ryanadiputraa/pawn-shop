@@ -21,7 +21,7 @@ import loginStyle from "./loginStyle";
 
 export default function Login() {
     const classes = loginStyle();
-    const [employeeId, setEmployeeId] = useState("asdasda");
+    const [userId, setUserId] = useState("");
     const [password, setPassword] = useState("");
     const [redirect, setRedirect] = useState(false);
     const [role, setRole] = useState("employee");
@@ -34,7 +34,7 @@ export default function Login() {
             headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify({
-                id: parseInt(employeeId),
+                id: parseInt(userId),
                 password: password,
             }),
         });
@@ -82,7 +82,7 @@ export default function Login() {
                                         ),
                                     }}
                                     onChange={(event) =>
-                                        setEmployeeId(event.target.value)
+                                        setUserId(event.target.value)
                                     }
                                 />
                                 <TextField

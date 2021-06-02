@@ -1,6 +1,16 @@
 import { makeStyles } from "@material-ui/core";
 
 const dashboardStyle = makeStyles((theme) => ({
+    container: {
+        display: "flex",
+        flexDirection: "column",
+    },
+    logout: {
+        display: "flex",
+        textDecoration: "none",
+        alignSelf: "flex-end",
+        marginTop: theme.spacing(3),
+    },
     title: {
         marginTop: theme.spacing(4),
     },

@@ -8,10 +8,12 @@ import {
 import { useState } from "react";
 import { useEffect } from "react";
 import { Redirect } from "react-router";
+import { Link } from "react-router-dom";
 import DataTable from "../Table/DataTable";
 import dashboardStyle from "./dashboard";
 import SearchIcon from "@material-ui/icons/Search";
 import EmployeeTable from "../EmployeeTable/EmployeeTable";
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 
 export default function Dashboard(props) {
     const classes = dashboardStyle();
@@ -58,6 +60,14 @@ export default function Dashboard(props) {
 
     if (redirect) return <Redirect to="/" />;
 
+    const handleLogout = async () => {
+        await fetch("http://localhost:8000/api/logout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        });
+    };
+
     const renderDashboard = (tableData) => {
         if (role === "manager") return <EmployeeTable data={tableData} />;
         else if (role === "employee") return <DataTable data={tableData} />;
@@ -65,8 +75,10 @@ export default function Dashboard(props) {
     };
 
     return (
-        <Container>
-            <a href="/">Logout</a>
+        <Container className={classes.container}>
+            <Link className={classes.logout} to="/" onClick={handleLogout}>
+                Logout <ExitToAppIcon />
+            </Link>
             <Typography
                 className={classes.title}
                 variant="h3"
