@@ -15,10 +15,10 @@ import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
 import Alert from "@material-ui/lab/Alert";
 import CloseIcon from "@material-ui/icons/Close";
-import customerModalStyle from "./customerModalStyle";
 import { useState } from "react";
+import customerModalStyle from "../CustomerModal/customerModalStyle";
 
-export default function CustomerModal({
+export default function EmployeeModal({
     openModal,
     setOpenModal,
     setIsSuccess,
@@ -27,28 +27,25 @@ export default function CustomerModal({
     const [firstname, setFirstname] = useState("");
     const [lastname, setLastname] = useState("");
     const [gender, setGender] = useState("pria");
-    const [contact, setContact] = useState("");
-    const [loan, setLoan] = useState("");
-    const [insuranceItem, setInsuranceItem] = useState("");
-    const [image, setImage] = useState("");
+    const [birthdate, setBirthdate] = useState("");
+    const [address, setAddress] = useState("");
+    const [password, setPassword] = useState("");
     const [isAlert, setIsAlert] = useState(false);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const formData = new FormData();
 
-        formData.append("firstname", firstname);
-        formData.append("lastname", lastname);
-        formData.append("gender", gender);
-        formData.append("contact", contact);
-        formData.append("loan", loan);
-        formData.append("insuranceItem", insuranceItem);
-        formData.append("upload", image);
-
-        const res = await fetch("http://localhost:8000/api/customers", {
+        const res = await fetch("http://localhost:8000/api/employees", {
             method: "POST",
             credentials: "include",
-            body: formData,
+            body: JSON.stringify({
+                firstname,
+                lastname,
+                gender,
+                birthdate,
+                address,
+                password,
+            }),
         });
         const data = await res.json();
 
@@ -84,9 +81,9 @@ export default function CustomerModal({
                         color="primary"
                         gutterBottom
                     >
-                        Form Gadai Barang
+                        Form Karyawan
                     </Typography>
-                    <p>Masukan Data Nasabah</p>
+                    <p>Masukan Data Karyawan</p>
                     <Collapse in={isAlert} className={classes.warning}>
                         <Alert
                             severity="error"
@@ -153,33 +150,25 @@ export default function CustomerModal({
                                 />
                             </RadioGroup>
                         </FormControl>
+                        <FormLabel component="legend">Tanggal Lahir</FormLabel>
                         <TextField
-                            type="text"
-                            label="Kontak"
-                            onChange={(event) => setContact(event.target.value)}
-                        />
-                        <TextField
-                            type="text"
-                            label="Pinjaman"
-                            onChange={(event) => setLoan(event.target.value)}
-                        />
-                        <TextField
-                            type="text"
-                            label="Barang Gadai"
+                            type="date"
                             onChange={(event) =>
-                                setInsuranceItem(event.target.value)
+                                setBirthdate(event.target.value)
                             }
                         />
-                        <Button variant="contained" component="label">
-                            Foto Barang
-                            <input
-                                type="file"
-                                hidden
-                                onChange={(event) =>
-                                    setImage(event.target.files[0])
-                                }
-                            />
-                        </Button>
+                        <TextField
+                            type="text"
+                            label="Alamat"
+                            onChange={(event) => setAddress(event.target.value)}
+                        />
+                        <TextField
+                            type="text"
+                            label="Password"
+                            onChange={(event) =>
+                                setPassword(event.target.value)
+                            }
+                        />
                         <Button
                             className={classes.loginButton}
                             variant="contained"

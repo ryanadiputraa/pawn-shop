@@ -16,7 +16,9 @@ type EmployeeService interface {
 	GetAllEmployees(ctx *gin.Context) (int, interface{})
 	GetEmployeeById(employee_id string) (int, interface{})
 	Register(entity.Employee) (int, interface{})
+	Update(employee entity.Employee, employee_id string) (int, interface{})
 	Login(loginData entity.LoginEmployee, ctx *gin.Context) (int, interface{})
+	LoginAdmin(loginData entity.LoginEmployee, ctx *gin.Context) (int, interface{})
 	Logout(ctx *gin.Context) (int, interface{})
 	DeleteEmployee(employee_id string) (int, interface{})
 }
@@ -28,6 +30,27 @@ func NewEmployeeService() EmployeeService {
 }
 
 func (service *employeeService) GetAllEmployees(ctx *gin.Context) (int, interface{}) {
+	// authenticate
+	cookie, err := ctx.Cookie("jwt")
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusUnauthorized,
+			Error: "no cookie found",
+		}
+		return http.StatusUnauthorized, response
+	}
+
+	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return []byte(config.GetAdminKey()), nil
+	})
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusUnauthorized,
+			Error: "unauthorized",
+		}
+		return http.StatusUnauthorized, response
+	}
+
 	db, err := config.OpenConnection()
 	if err != nil {
 		response := entity.Error {
@@ -146,6 +169,35 @@ func (service *employeeService) Register(employee entity.Employee) (int, interfa
 	return http.StatusCreated, response
 }
 
+func (service *employeeService) Update(employee entity.Employee, employee_id string) (int, interface{}) {
+	db, err := config.OpenConnection()
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadGateway,
+			Error: "can't open db connection",
+		}
+		return http.StatusBadGateway, response
+	}
+	defer db.Close()
+
+	query := fmt.Sprintf("UPDATE employees SET firstname = '%v', lastname = '%v', gender = '%v', birthdate = '%v', address = '%v', password = '%v' WHERE employee_id = %v", employee.Firstname, employee.Lastname, employee.Gender, employee.Birthdate, employee.Address, employee.Password, employee_id)
+
+	_, err = db.Exec(query)
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadRequest,
+			// Error: "can't update employee data",
+			Error: err.Error(),
+		}
+		return http.StatusBadRequest, response
+	}
+
+	response := entity.HTTPCode {
+		Code: http.StatusOK,
+	}
+	return http.StatusOK, response
+}
+
 func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.Context) (int, interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
@@ -211,8 +263,37 @@ func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.C
 	return http.StatusAccepted, response
 }
 
+func (service *employeeService) LoginAdmin(loginData entity.LoginEmployee, ctx *gin.Context) (int, interface{}) {
+	if loginData.ID != 123 && loginData.Password != "admin" {
+		response := entity.Error {
+			Code: http.StatusUnauthorized,
+			Error: "unauthorized",
+		}
+		return http.StatusUnauthorized, response
+	}
+
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer: strconv.Itoa(loginData.ID),
+		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	token, err := claims.SignedString([]byte(config.GetAdminKey()))
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusInternalServerError,
+			Error: "can't generate token",
+		}
+		return http.StatusInternalServerError, response
+	}
+
+	ctx.SetCookie("jwt", token, 60*60*24, "", "", true, true)
+	response := entity.HTTPCode { Code: http.StatusAccepted }
+
+	return http.StatusAccepted, response
+}
+
 func (service *employeeService) Logout(ctx *gin.Context) (int, interface{}) {
-	ctx.SetCookie("jwt", "", 0, "", "", true, true)
+	ctx.SetCookie("jwt", "", 60, "", "", true, true)
 	response := entity.HTTPCode { Code: http.StatusOK }
 	return http.StatusOK, response
 }

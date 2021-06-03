@@ -6,6 +6,10 @@ const customerModalStyle = makeStyles((theme) => ({
         alignItems: "center",
         justifyContent: "center",
     },
+    title: {
+        display: "flex",
+        justifyContent: "center",
+    },
     paper: {
         backgroundColor: theme.palette.background.paper,
         boxShadow: theme.shadows[5],

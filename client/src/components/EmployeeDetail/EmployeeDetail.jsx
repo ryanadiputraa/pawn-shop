@@ -15,44 +15,81 @@ import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
 import Alert from "@material-ui/lab/Alert";
 import CloseIcon from "@material-ui/icons/Close";
-import customerModalStyle from "./customerModalStyle";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import customerModalStyle from "../CustomerModal/customerModalStyle";
 
-export default function CustomerModal({
+export default function EmployeeDetail({
+    data,
     openModal,
     setOpenModal,
     setIsSuccess,
 }) {
     const classes = customerModalStyle();
-    const [firstname, setFirstname] = useState("");
+    const [firstname, setFirstname] = useState();
     const [lastname, setLastname] = useState("");
-    const [gender, setGender] = useState("pria");
-    const [contact, setContact] = useState("");
-    const [loan, setLoan] = useState("");
-    const [insuranceItem, setInsuranceItem] = useState("");
-    const [image, setImage] = useState("");
+    const [gender, setGender] = useState("");
+    const [birthdate, setBirthdate] = useState("");
+    const [address, setAddress] = useState("");
+    const [password, setPassword] = useState("");
     const [isAlert, setIsAlert] = useState(false);
 
-    const handleSubmit = async (event) => {
+    useEffect(() => {
+        const abortCont = new AbortController();
+
+        setFirstname(data.firstname);
+        setLastname(data.lastname);
+        setGender(data.gender);
+        setBirthdate(data.birthdate);
+        setAddress(data.address);
+        setPassword(data.password);
+
+        return () => abortCont.abort();
+    }, [data]);
+
+    const handleDelete = async (event) => {
         event.preventDefault();
-        const formData = new FormData();
 
-        formData.append("firstname", firstname);
-        formData.append("lastname", lastname);
-        formData.append("gender", gender);
-        formData.append("contact", contact);
-        formData.append("loan", loan);
-        formData.append("insuranceItem", insuranceItem);
-        formData.append("upload", image);
+        const res = await fetch(
+            `http://localhost:8000/api/employees/${data.id}`,
+            {
+                method: "DELETE",
+                credentials: "include",
+            }
+        );
+        const resData = await res.json();
 
-        const res = await fetch("http://localhost:8000/api/customers", {
-            method: "POST",
-            credentials: "include",
-            body: formData,
-        });
-        const data = await res.json();
+        if (resData.code === 200) {
+            window.location.reload();
+            setIsAlert(false);
+            setOpenModal(false);
+            setIsSuccess(true);
+        } else {
+            setIsAlert(true);
+            setIsSuccess(false);
+        }
+    };
 
-        if (data.code === 201) {
+    const handleUpdate = async (event) => {
+        event.preventDefault();
+
+        const res = await fetch(
+            `http://localhost:8000/api/employees/${data.id}`,
+            {
+                method: "PUT",
+                credentials: "include",
+                body: JSON.stringify({
+                    firstname: firstname,
+                    lastname: lastname,
+                    gender: gender,
+                    birthdate: birthdate,
+                    address: address,
+                    password: password,
+                }),
+            }
+        );
+        const resData = await res.json();
+
+        if (resData.code === 200) {
             window.location.reload();
             setIsAlert(false);
             setOpenModal(false);
@@ -84,9 +121,9 @@ export default function CustomerModal({
                         color="primary"
                         gutterBottom
                     >
-                        Form Gadai Barang
+                        Form Karyawan
                     </Typography>
-                    <p>Masukan Data Nasabah</p>
+                    <p>Masukan Data Karyawan</p>
                     <Collapse in={isAlert} className={classes.warning}>
                         <Alert
                             severity="error"
@@ -106,7 +143,6 @@ export default function CustomerModal({
                     </Collapse>
                     <form
                         encType="multipart/form-data"
-                        onSubmit={handleSubmit}
                         noValidate
                         autoComplete="off"
                         className={classes.inputForm}
@@ -114,6 +150,8 @@ export default function CustomerModal({
                         <TextField
                             type="text"
                             label="Nama Depan"
+                            InputLabelProps={{ shrink: true }}
+                            value={firstname}
                             onChange={(event) =>
                                 setFirstname(event.target.value)
                             }
@@ -121,6 +159,8 @@ export default function CustomerModal({
                         <TextField
                             type="text"
                             label="Nama Belakang"
+                            InputLabelProps={{ shrink: true }}
+                            value={lastname}
                             onChange={(event) =>
                                 setLastname(event.target.value)
                             }
@@ -153,38 +193,43 @@ export default function CustomerModal({
                                 />
                             </RadioGroup>
                         </FormControl>
+                        <FormLabel component="legend">Tanggal Lahir</FormLabel>
                         <TextField
-                            type="text"
-                            label="Kontak"
-                            onChange={(event) => setContact(event.target.value)}
-                        />
-                        <TextField
-                            type="text"
-                            label="Pinjaman"
-                            onChange={(event) => setLoan(event.target.value)}
-                        />
-                        <TextField
-                            type="text"
-                            label="Barang Gadai"
+                            type="date"
+                            value={birthdate}
                             onChange={(event) =>
-                                setInsuranceItem(event.target.value)
+                                setBirthdate(event.target.value)
                             }
                         />
-                        <Button variant="contained" component="label">
-                            Foto Barang
-                            <input
-                                type="file"
-                                hidden
-                                onChange={(event) =>
-                                    setImage(event.target.files[0])
-                                }
-                            />
+                        <TextField
+                            type="text"
+                            label="Alamat"
+                            InputLabelProps={{ shrink: true }}
+                            value={address}
+                            onChange={(event) => setAddress(event.target.value)}
+                        />
+                        <TextField
+                            type="text"
+                            label="Password"
+                            InputLabelProps={{ shrink: true }}
+                            value={password}
+                            onChange={(event) =>
+                                setPassword(event.target.value)
+                            }
+                        />
+                        <Button
+                            className={classes.loginButton}
+                            variant="contained"
+                            color="secondary"
+                            onClick={handleDelete}
+                        >
+                            Hapus
                         </Button>
                         <Button
                             className={classes.loginButton}
                             variant="contained"
                             color="primary"
-                            type="submit"
+                            onClick={handleUpdate}
                         >
                             Simpan
                         </Button>

@@ -8,6 +8,8 @@ import {
     TableHead,
     TableBody,
 } from "@material-ui/core";
+import { useState } from "react";
+import EmployeeDetail from "../EmployeeDetail/EmployeeDetail";
 import tableStyle from "../Table/tableStyle";
 
 const StyledTableCell = withStyles((theme) => ({
@@ -29,8 +31,15 @@ const headers = [
     "Password",
 ];
 
-export default function EmployeeTable({ data }) {
+export default function EmployeeTable({ data, setIsSuccess }) {
     const classes = tableStyle();
+    const [openDetail, setOpenDetail] = useState(false);
+    const [selectedData, setSelectedData] = useState({});
+
+    const handleSelectData = (data) => {
+        setOpenDetail(true);
+        setSelectedData(data);
+    };
 
     return (
         <TableContainer component={Paper}>
@@ -52,7 +61,11 @@ export default function EmployeeTable({ data }) {
                 </TableHead>
                 <TableBody>
                     {data.map((d) => (
-                        <TableRow className={classes.dataRow} key={d.id}>
+                        <TableRow
+                            className={classes.dataRow}
+                            onClick={() => handleSelectData(d)}
+                            key={d.id}
+                        >
                             <TableCell align="center">{d.id}</TableCell>
                             <TableCell component="th" scope="row">
                                 {`${d.firstname} ${d.lastname}`}
@@ -67,6 +80,12 @@ export default function EmployeeTable({ data }) {
                     ))}
                 </TableBody>
             </Table>
+            <EmployeeDetail
+                openModal={openDetail}
+                setOpenModal={setOpenDetail}
+                data={selectedData}
+                setIsSuccess={setIsSuccess}
+            />
         </TableContainer>
     );
 }

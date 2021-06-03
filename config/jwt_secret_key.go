@@ -15,3 +15,12 @@ func GetSecretKey() string {
 	secretKey := os.Getenv("SECRET_KEY")
 	return secretKey
 }
+
+func GetAdminKey() string {
+	if err := godotenv.Load(".env"); err != nil {
+		log.Fatal(err)
+	}
+
+	secretKey := os.Getenv("ADMIN_KEY")
+	return secretKey
+}

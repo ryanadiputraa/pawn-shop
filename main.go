@@ -42,11 +42,17 @@ func main() {
 	api.POST("/employees", func(c *gin.Context) {
 		employeeController.Register(c)
 	})
+	api.PUT("/employees/:employee_id", func(c *gin.Context) {
+		employeeController.Update(c)
+	})
 	api.DELETE("/employees/:employee_id", func(c *gin.Context) {
 		employeeController.DeleteEmployee(c)
 	})
 	api.POST("/login", func(c *gin.Context) {
 		employeeController.Login(c)
+	})
+	api.POST("/loginadmin", func(c *gin.Context) {
+		employeeController.LoginAdmin(c)
 	})
 	api.POST("/logout", func(c *gin.Context) {
 		employeeController.Logout(c)

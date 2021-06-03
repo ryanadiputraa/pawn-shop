@@ -10,9 +10,11 @@ import (
 type EmployeeController interface {
 	GetAllEmployees(ctx *gin.Context)
 	Register(ctx *gin.Context)
+	Update(ctx *gin.Context)
 	GetEmployeeById(ctx *gin.Context)
 	DeleteEmployee(ctx *gin.Context)
 	Login(ctx *gin.Context)
+	LoginAdmin(ctx *gin.Context)
 	Logout(ctx *gin.Context)
 }
 
@@ -47,10 +49,27 @@ func (c *employeeController) Register(ctx *gin.Context) {
 	helper.WriteResponse(ctx, code, response)
 }
 
+func (c *employeeController) Update(ctx *gin.Context) {
+	employeeId := ctx.Param("employee_id")
+	var employee entity.Employee
+	ctx.BindJSON(&employee)
+	code, response := c.service.Update(employee, employeeId)
+
+	helper.WriteResponse(ctx, code, response)
+}
+
 func (c *employeeController) Login(ctx *gin.Context) {
 	var loginData entity.LoginEmployee
 	ctx.BindJSON(&loginData)
 	code, response := c.service.Login(loginData, ctx)
+
+	helper.WriteResponse(ctx, code, response)
+}
+
+func (c *employeeController) LoginAdmin(ctx *gin.Context) {
+	var loginData entity.LoginEmployee
+	ctx.BindJSON(&loginData)
+	code, response := c.service.LoginAdmin(loginData, ctx)
 
 	helper.WriteResponse(ctx, code, response)
 }

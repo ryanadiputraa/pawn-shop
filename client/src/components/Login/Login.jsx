@@ -34,22 +34,45 @@ export default function Login() {
     const handleLogin = async (event) => {
         event.preventDefault();
 
-        const res = await fetch("http://localhost:8000/api/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-                id: parseInt(userId),
-                password: password,
-            }),
-        });
-        const data = await res.json();
+        if (userId !== "" && password !== "" && role === "employee") {
+            const res = await fetch("http://localhost:8000/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    id: parseInt(userId),
+                    password: password,
+                }),
+            });
+            const data = await res.json();
 
-        if (data.code === 202) {
-            setRedirect(true);
-            setIsError(false);
+            if (data.code === 202) {
+                setRedirect(true);
+                setIsError(false);
+            } else {
+                setRedirect(false);
+                setIsError(true);
+            }
+        } else if (userId !== "" && password !== "" && role === "manager") {
+            const res = await fetch("http://localhost:8000/api/loginadmin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    id: parseInt(userId),
+                    password: password,
+                }),
+            });
+            const data = await res.json();
+
+            if (data.code === 202) {
+                setRedirect(true);
+                setIsError(false);
+            } else {
+                setRedirect(false);
+                setIsError(true);
+            }
         } else {
-            setRedirect(false);
             setIsError(true);
         }
     };

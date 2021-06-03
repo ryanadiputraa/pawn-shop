@@ -21,6 +21,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 import CustomerModal from "../CustomerModal/CustomerModal";
+import EmployeeModal from "../EmployeeModal/EmployeeModal";
 
 export default function Dashboard(props) {
     const classes = dashboardStyle();
@@ -31,6 +32,7 @@ export default function Dashboard(props) {
     const [isSuccess, setIsSuccess] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const [isPaymentSuccess, setIsPaymentSuccess] = useState(false);
+    const [openEmployeeModal, setOpenEmployeeModal] = useState(false);
 
     const params = new URLSearchParams(props.location.search);
     const role = params.get("role");
@@ -53,7 +55,6 @@ export default function Dashboard(props) {
                 credentials: "include",
             });
             const data = await res.json();
-            console.log(data);
 
             setTableData(data);
             if (data.code === 401) setRedirect(true);
@@ -114,7 +115,10 @@ export default function Dashboard(props) {
     };
 
     const renderDashboard = (tableData) => {
-        if (role === "manager") return <EmployeeTable data={tableData} />;
+        if (role === "manager")
+            return (
+                <EmployeeTable data={tableData} setIsSuccess={setIsSuccess} />
+            );
         else if (role === "employee")
             return (
                 <DataTable
@@ -214,7 +218,7 @@ export default function Dashboard(props) {
                         </IconButton>
                     }
                 >
-                    Data berhasil ditambahkan!
+                    Data berhasil disimpan!
                 </Alert>
             </Collapse>
             <Collapse in={isPaymentSuccess} className={classes.warning}>
@@ -235,17 +239,33 @@ export default function Dashboard(props) {
                 </Alert>
             </Collapse>
             {isLoading ? <CircularProgress /> : renderDashboard(tableData)}
-            <Fab
-                className={classes.fabAdd}
-                onClick={() => setOpenModal(true)}
-                color="primary"
-                aria-label="add"
-            >
-                <AddIcon />
-            </Fab>
+            {role === "employee" ? (
+                <Fab
+                    className={classes.fabAdd}
+                    onClick={() => setOpenModal(true)}
+                    color="primary"
+                    aria-label="add"
+                >
+                    <AddIcon />
+                </Fab>
+            ) : (
+                <Fab
+                    className={classes.fabAdd}
+                    onClick={() => setOpenEmployeeModal(true)}
+                    color="primary"
+                    aria-label="add"
+                >
+                    <AddIcon />
+                </Fab>
+            )}
             <CustomerModal
                 openModal={openModal}
                 setOpenModal={setOpenModal}
+                setIsSuccess={setIsSuccess}
+            />
+            <EmployeeModal
+                openModal={openEmployeeModal}
+                setOpenModal={setOpenEmployeeModal}
                 setIsSuccess={setIsSuccess}
             />
         </Container>
