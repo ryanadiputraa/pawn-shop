@@ -21,7 +21,6 @@ import CloseIcon from "@material-ui/icons/Close";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 import CustomerModal from "../CustomerModal/CustomerModal";
-import PaymentModal from "../PaymentModal/PaymentModal";
 
 export default function Dashboard(props) {
     const classes = dashboardStyle();
@@ -31,7 +30,7 @@ export default function Dashboard(props) {
     const [isNotFound, setIsNotFound] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [openModal, setOpenModal] = useState(false);
-    const [openPayment, setOpenPayment] = useState(true);
+    const [isPaymentSuccess, setIsPaymentSuccess] = useState(false);
 
     const params = new URLSearchParams(props.location.search);
     const role = params.get("role");
@@ -116,7 +115,13 @@ export default function Dashboard(props) {
 
     const renderDashboard = (tableData) => {
         if (role === "manager") return <EmployeeTable data={tableData} />;
-        else if (role === "employee") return <DataTable data={tableData} />;
+        else if (role === "employee")
+            return (
+                <DataTable
+                    data={tableData}
+                    setIsPaymentSuccess={setIsPaymentSuccess}
+                />
+            );
         else return <Redirect to="/" />;
     };
 
@@ -212,6 +217,23 @@ export default function Dashboard(props) {
                     Data berhasil ditambahkan!
                 </Alert>
             </Collapse>
+            <Collapse in={isPaymentSuccess} className={classes.warning}>
+                <Alert
+                    severity="success"
+                    action={
+                        <IconButton
+                            aria-label="close"
+                            color="inherit"
+                            size="small"
+                            onClick={() => setIsPaymentSuccess(false)}
+                        >
+                            <CloseIcon fontSize="inherit" />
+                        </IconButton>
+                    }
+                >
+                    Proses Pembayaran Berhasil!
+                </Alert>
+            </Collapse>
             {isLoading ? <CircularProgress /> : renderDashboard(tableData)}
             <Fab
                 className={classes.fabAdd}
@@ -225,10 +247,6 @@ export default function Dashboard(props) {
                 openModal={openModal}
                 setOpenModal={setOpenModal}
                 setIsSuccess={setIsSuccess}
-            />
-            <PaymentModal
-                openPayment={openPayment}
-                setOpenPayment={setOpenPayment}
             />
         </Container>
     );

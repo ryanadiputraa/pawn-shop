@@ -8,6 +8,8 @@ import {
     TableHead,
     TableBody,
 } from "@material-ui/core";
+import { useState } from "react";
+import PaymentModal from "../PaymentModal/PaymentModal";
 import tableStyle from "./tableStyle";
 
 const StyledTableCell = withStyles((theme) => ({
@@ -48,8 +50,15 @@ const formatCurrency = (currency) => {
     return currency.reverse().join("");
 };
 
-export default function DataTable({ data }) {
+export default function DataTable({ data, setIsPaymentSuccess }) {
     const classes = tableStyle();
+    const [openPayment, setOpenPayment] = useState(false);
+    const [selectedData, setSelectedData] = useState({});
+
+    const handleSelectData = (data) => {
+        setOpenPayment(true);
+        setSelectedData(data);
+    };
 
     return (
         <TableContainer component={Paper}>
@@ -74,6 +83,7 @@ export default function DataTable({ data }) {
                         <TableRow
                             className={classes.dataRow}
                             key={d.customerId}
+                            onClick={() => handleSelectData(d)}
                         >
                             <TableCell component="th" scope="row">
                                 {`${d.firstname} ${d.lastname}`}
@@ -96,6 +106,12 @@ export default function DataTable({ data }) {
                     ))}
                 </TableBody>
             </Table>
+            <PaymentModal
+                openPayment={openPayment}
+                setOpenPayment={setOpenPayment}
+                data={selectedData}
+                setIsPaymentSuccess={setIsPaymentSuccess}
+            />
         </TableContainer>
     );
 }
