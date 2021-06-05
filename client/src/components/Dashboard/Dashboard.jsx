@@ -66,8 +66,8 @@ export default function Dashboard(props) {
 
     const handleSearch = async (event) => {
         event.preventDefault();
-        const name = event.target.value;
-        if (name === "") {
+        const query = event.target.value;
+        if (query === "") {
             fetchTableData(role);
             return;
         }
@@ -80,15 +80,15 @@ export default function Dashboard(props) {
             endpoint = "employees";
         }
         const res = await fetch(
-            `http://localhost:8000/api/${endpoint}?name=${name}`,
+            `http://localhost:8000/api/${endpoint}?query=${query}`,
             {
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
             }
         );
         const data = await res.json();
-        setIsLoading(false);
 
+        setIsLoading(false);
         if (!data.code) {
             setTableData(data);
             setIsNotFound(false);
@@ -201,7 +201,7 @@ export default function Dashboard(props) {
                         </IconButton>
                     }
                 >
-                    Tidak ada nama yang sesuai ditemukan!
+                    Tidak ada data yang sesuai ditemukan!
                 </Alert>
             </Collapse>
             <Collapse in={isSuccess} className={classes.warning}>

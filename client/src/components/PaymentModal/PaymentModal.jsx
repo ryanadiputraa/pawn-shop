@@ -78,7 +78,11 @@ export default function PaymentModal({
                         target="_blank"
                         rel="noreferrer"
                     >
-                        <img src={data.image} alt="customer insurance item" />
+                        <img
+                            className={classes.image}
+                            src={data.image}
+                            alt="customer insurance item"
+                        />
                     </a>
                     <Typography variant="h6" component="p">
                         Barang Jaminan : {data.insuranceItem}

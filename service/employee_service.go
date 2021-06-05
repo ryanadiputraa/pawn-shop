@@ -64,7 +64,7 @@ func (service *employeeService) GetAllEmployees(ctx *gin.Context) (int, interfac
 	var query string
 	URLQueryParam := ctx.Request.URL.Query()
 	if len(URLQueryParam) != 0 {
-		query = fmt.Sprintf("SELECT * FROM employees WHERE LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%')", URLQueryParam["name"][0], URLQueryParam["name"][0])
+		query = fmt.Sprintf("SELECT * FROM employees WHERE CAST(employee_id AS TEXT) LIKE '%v%%' OR LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%') OR LOWER(gender) LIKE LOWER('%v%%') OR CAST(birthdate AS TEXT) LIKE '%v%%' OR LOWER(address) LIKE LOWER('%v%%') OR LOWER(password) LIKE LOWER('%v%%')", URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0])
 	} else {
 		query = `SELECT * FROM employees`
 	}

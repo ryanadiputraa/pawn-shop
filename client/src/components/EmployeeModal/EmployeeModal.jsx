@@ -50,7 +50,6 @@ export default function EmployeeModal({
         const data = await res.json();
 
         if (data.code === 201) {
-            window.location.reload();
             setIsAlert(false);
             setOpenModal(false);
             setIsSuccess(true);

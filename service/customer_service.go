@@ -66,7 +66,7 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (int, interface
 	var query string
 	URLQueryParam := ctx.Request.URL.Query()
 	if len(URLQueryParam) != 0 {
-		query = fmt.Sprintf("SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status, image FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id WHERE LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%')", URLQueryParam["name"][0], URLQueryParam["name"][0])
+		query = fmt.Sprintf("SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status, image FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id WHERE LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%') OR LOWER(gender) LIKE LOWER('%v%%') OR contact LIKE '%v%%' OR CAST(nominal as TEXT) LIKE '%v%%' OR CAST((nominal + interest) AS TEXT) LIKE '%v%%' OR LOWER(item_name) LIKE LOWER('%v%%') OR LOWER(status) LIKE LOWER('%v%%')", URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0])
 	} else {
 		query = `SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status, image FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id`
 	}

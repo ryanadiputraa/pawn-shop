@@ -59,7 +59,6 @@ export default function EmployeeDetail({
         const resData = await res.json();
 
         if (resData.code === 200) {
-            window.location.reload();
             setIsAlert(false);
             setOpenModal(false);
             setIsSuccess(true);
@@ -90,7 +89,6 @@ export default function EmployeeDetail({
         const resData = await res.json();
 
         if (resData.code === 200) {
-            window.location.reload();
             setIsAlert(false);
             setOpenModal(false);
             setIsSuccess(true);
