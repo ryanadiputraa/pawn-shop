@@ -1,6 +1,6 @@
 # PAWN SHOP
 
-Pawn Shop is a information system for managing Pawn Shop data. Build with Golang as a RESTful API with PostgreSQL for database, and ReactJS for client side.
+Pawn Shop is a information system for managing Pawn Shop Information System data. Build with Golang as a RESTful API with PostgreSQL for database.
 
 ## API SPEC
 
@@ -15,12 +15,12 @@ Pawn Shop is a information system for managing Pawn Shop data. Build with Golang
 -   Header :
     -   Content-Type : `application/json`
     -   Accept : `application/json`
+    -   X-Access-Token: `token`
 -   Response :
 
 ```json
 {
-    "code": "Number",
-    "data": [
+    [
         {
             "employee_id": "Number",
             "firstname": "String",
@@ -41,20 +41,18 @@ Pawn Shop is a information system for managing Pawn Shop data. Build with Golang
 -   Header :
     -   Content-Type : `application/json`
     -   Accept : `application/json`
+    -   X-Access-Token: `token`
 -   Response :
 
 ```json
 {
-    "code": "Number",
-    "data": {
-        "employee_id": "Number",
-        "firstname": "String",
-        "lastname": "String",
-        "gender": ("pria" || "wanita"),
-        "birthdate": "YYYY-MM-DD",
-        "address": "String",
-        "password": "String"
-    }
+    "employee_id": "Number",
+    "firstname": "String",
+    "lastname": "String",
+    "gender": ("pria" || "wanita"),
+    "birthdate": "YYYY-MM-DD",
+    "address": "String",
+    "password": "String"
 }
 ```
 
@@ -65,6 +63,7 @@ Pawn Shop is a information system for managing Pawn Shop data. Build with Golang
 -   Header :
     -   Content-Type : `application/json`
     -   Accept : `application/json`
+    -   X-Access-Token: `token`
 -   Body :
 
 ```json
@@ -93,6 +92,7 @@ Pawn Shop is a information system for managing Pawn Shop data. Build with Golang
 -   Header :
     -   Content-Type : `application/json`
     -   Accept : `application/json`
+    -   X-Access-Token: `token`
 -   Body :
 
 ```json
@@ -117,6 +117,7 @@ Pawn Shop is a information system for managing Pawn Shop data. Build with Golang
 -   Header :
     -   Content-Type : `application/json`
     -   Accept : `application/json`
+    -   X-Access-Token: `token`
 -   Body :
 
 ```json
@@ -145,6 +146,7 @@ Pawn Shop is a information system for managing Pawn Shop data. Build with Golang
 -   Header :
     -   Content-Type : `application/json`
     -   Accept : `application/json`
+    -   X-Access-Token: `token`
 -   Response :
 
 ```json
@@ -169,8 +171,7 @@ Pawn Shop is a information system for managing Pawn Shop data. Build with Golang
 
 ```json
 {
-    "code": "Number",
-    "data": [
+    [
         {
              "customer_id": "String",
              "firstname": "String",
@@ -233,6 +234,7 @@ Pawn Shop is a information system for managing Pawn Shop data. Build with Golang
 }
 ```
 
+<!--
 ### Bail Auction
 
 -   Method : `PUT`
@@ -247,4 +249,4 @@ Pawn Shop is a information system for managing Pawn Shop data. Build with Golang
 {
     "code": "Number"
 }
-```
+``` -->
