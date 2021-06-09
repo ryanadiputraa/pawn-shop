@@ -35,7 +35,7 @@ func NewCustomerService() CustomerService {
 func (service *customerService) GetAllCustomer(ctx *gin.Context) (code int, response interface{}) {
 	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusUnauthorized,
 			Error: "no cookie found",
 		}
@@ -46,7 +46,7 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (code int, resp
 		return []byte(config.GetSecretKey()), nil
 	})
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusUnauthorized,
 			Error: "unauthorized",
 		}
@@ -55,7 +55,7 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (code int, resp
 
 	db, err := config.OpenConnection()
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadGateway,
 			Error: "can't open db connection",
 		}
@@ -73,7 +73,7 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (code int, resp
 
 	rows, err := db.Query(query)
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: "can't get customers data",
 		}
@@ -89,7 +89,7 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (code int, resp
 	}
 	defer rows.Close()
 	if customers == nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusNotFound,
 			Error: "no customers with given name",
 		}
@@ -102,7 +102,7 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (code int, resp
 func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response interface{}) {
 	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusUnauthorized,
 			Error: "no cookie found",
 		}
@@ -113,7 +113,7 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response
 		return []byte(config.GetSecretKey()), nil
 	})
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusUnauthorized,
 			Error: "unauthorized",
 		}
@@ -122,7 +122,7 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response
 
 	db, err := config.OpenConnection()
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadGateway,
 			Error: "can't open db connection",
 		}
@@ -132,7 +132,7 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response
 
 	file, err := ctx.FormFile("upload")
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: err.Error(),
 		}
@@ -141,7 +141,7 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response
 
 	err = ctx.SaveUploadedFile(file, "./uploads/"+file.Filename)
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: err.Error(),
 		}
@@ -155,7 +155,7 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response
 	customer.Contact = ctx.Request.FormValue("contact")
 	customer.Loan, err = strconv.Atoi(ctx.Request.FormValue("loan"))
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: err.Error(),
 		}
@@ -168,7 +168,7 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response
 
 	loan_id, err := uuid.NewUUID()
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusInternalServerError,
 			Error: "can't generate uuid",
 		}
@@ -176,7 +176,7 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response
 	}
 	item_id, err := uuid.NewUUID()
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusInternalServerError,
 			Error: "can't generate uuid",
 		}
@@ -184,7 +184,7 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response
 	}
 	customer_id, err := uuid.NewUUID()
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusInternalServerError,
 			Error: "can't generate uuid",
 		}
@@ -194,7 +194,7 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response
 	query := `INSERT INTO insurance_items (item_id, item_name, image, status) VALUES ($1, $2, $3, $4)`
 	_, err = db.Exec(query, item_id, customer.InsuranceItem, customer.Image, "jaminan")
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: "fail to insert insurance item",
 		}
@@ -204,7 +204,7 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response
 	query = `INSERT INTO loans (loan_id, nominal, interest) VALUES ($1, $2, $3)`
 	_, err = db.Exec(query, loan_id, strconv.Itoa(customer.Loan), strconv.Itoa(customer.Interest))
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: "fail to insert loan",
 		}
@@ -214,7 +214,7 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response
 	query = `INSERT INTO customers (customer_id, firstname, lastname, gender, loan, insurance_item, contact) VALUES ($1, $2, $3, $4, $5, $6, $7)`
 	_, err = db.Exec(query, customer_id, customer.Firstname, customer.Lastname, customer.Gender, loan_id, item_id, customer.Contact)
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: "fail to insert customer",
 		}
@@ -229,7 +229,7 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response
 func (service *customerService) PayOffLoan(ctx *gin.Context, customerId string) (code int, response interface{}) {
 	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusUnauthorized,
 			Error: "no cookie found",
 		}
@@ -240,7 +240,7 @@ func (service *customerService) PayOffLoan(ctx *gin.Context, customerId string) 
 		return []byte(config.GetSecretKey()), nil
 	})
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusUnauthorized,
 			Error: "unauthorized",
 		}
@@ -249,7 +249,7 @@ func (service *customerService) PayOffLoan(ctx *gin.Context, customerId string) 
 
 	db, err := config.OpenConnection()
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadGateway,
 			Error: "can't open db connection",
 		}
@@ -259,7 +259,7 @@ func (service *customerService) PayOffLoan(ctx *gin.Context, customerId string) 
 
 	row, err := db.Query(fmt.Sprintf("SELECT insurance_item FROM customers WHERE customer_id = '%v'", customerId))
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: "can't get customer data",
 		}
@@ -270,7 +270,7 @@ func (service *customerService) PayOffLoan(ctx *gin.Context, customerId string) 
 	var customer entity.Customer
 	isNotNull := row.Next()
 	if !isNotNull {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusNotFound,
 			Error: "no customer with given id",
 		}
@@ -282,7 +282,7 @@ func (service *customerService) PayOffLoan(ctx *gin.Context, customerId string) 
 	query := fmt.Sprintf("UPDATE insurance_items SET status = 'ditebus' WHERE item_id = '%v'", customer.InsuranceItem)
 	_, err = db.Exec(query)
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: "fail to secure paymant",
 		}
@@ -297,7 +297,7 @@ func (service *customerService) PayOffLoan(ctx *gin.Context, customerId string) 
 func (service *customerService) GetFinancialStatements(ctx *gin.Context) (code int, response interface{}) {
 	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusUnauthorized,
 			Error: "no cookie found",
 		}
@@ -308,7 +308,7 @@ func (service *customerService) GetFinancialStatements(ctx *gin.Context) (code i
 		return []byte(config.GetSecretKey()), nil
 	})
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusUnauthorized,
 			Error: "unauthorized",
 		}
@@ -317,7 +317,7 @@ func (service *customerService) GetFinancialStatements(ctx *gin.Context) (code i
 
 	db, err := config.OpenConnection()
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadGateway,
 			Error: "can't open db connection",
 		}
@@ -328,7 +328,7 @@ func (service *customerService) GetFinancialStatements(ctx *gin.Context) (code i
 	query := "SELECT SUM (nominal) FROM loans"
 	rows, err := db.Query(query)
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: "can't get total loans",
 		}
@@ -344,7 +344,7 @@ func (service *customerService) GetFinancialStatements(ctx *gin.Context) (code i
 
 	rows, err = db.Query(query)
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: "can't get financial statements data",
 		}

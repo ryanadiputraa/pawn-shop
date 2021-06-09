@@ -33,7 +33,7 @@ func (service *employeeService) GetAllEmployees(ctx *gin.Context) (code int, res
 	// authenticate
 	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusUnauthorized,
 			Error: "no cookie found",
 		}
@@ -44,7 +44,7 @@ func (service *employeeService) GetAllEmployees(ctx *gin.Context) (code int, res
 		return []byte(config.GetAdminKey()), nil
 	})
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusUnauthorized,
 			Error: "unauthorized",
 		}
@@ -53,7 +53,7 @@ func (service *employeeService) GetAllEmployees(ctx *gin.Context) (code int, res
 
 	db, err := config.OpenConnection()
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadGateway,
 			Error: "can't open db connection",
 		}
@@ -71,7 +71,7 @@ func (service *employeeService) GetAllEmployees(ctx *gin.Context) (code int, res
 
 	rows, err := db.Query(query)
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: "can't get employees data",
 		}
@@ -87,7 +87,7 @@ func (service *employeeService) GetAllEmployees(ctx *gin.Context) (code int, res
 	}
 	defer rows.Close()
 	if employees == nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusNotFound,
 			Error: "no employee with given name",
 		}
@@ -100,7 +100,7 @@ func (service *employeeService) GetAllEmployees(ctx *gin.Context) (code int, res
 func (service *employeeService) GetEmployeeById(employee_id string) (code int, response interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadGateway,
 			Error: "can't open db connection",
 		}
@@ -110,7 +110,7 @@ func (service *employeeService) GetEmployeeById(employee_id string) (code int, r
 
 	row, err := db.Query(fmt.Sprintf("SELECT * FROM employees WHERE employee_id = %v", employee_id))
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: "can't get employee data",
 		}
@@ -121,7 +121,7 @@ func (service *employeeService) GetEmployeeById(employee_id string) (code int, r
 	var employee entity.Employee
 	isNotNull := row.Next()
 	if !isNotNull {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusNotFound,
 			Error: "no employee with given id",
 		}
@@ -135,7 +135,7 @@ func (service *employeeService) GetEmployeeById(employee_id string) (code int, r
 func (service *employeeService) Register(employee entity.Employee) (code int, response interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadGateway,
 			Error: "can't open db connection",
 		}
@@ -156,7 +156,7 @@ func (service *employeeService) Register(employee entity.Employee) (code int, re
 	
 	_, err = db.Exec(query, employee.Firstname, employee.Lastname, employee.Gender, employee.Birthdate, employee.Address, employee.Password)
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: "can't insert data into db",
 		}
@@ -172,7 +172,7 @@ func (service *employeeService) Register(employee entity.Employee) (code int, re
 func (service *employeeService) Update(employee entity.Employee, employee_id string) (code int, response interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadGateway,
 			Error: "can't open db connection",
 		}
@@ -184,10 +184,9 @@ func (service *employeeService) Update(employee entity.Employee, employee_id str
 
 	_, err = db.Exec(query)
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
-			// Error: "can't update employee data",
-			Error: err.Error(),
+			Error: "can't update employee data",
 		}
 		return http.StatusBadRequest, response
 	}
@@ -201,7 +200,7 @@ func (service *employeeService) Update(employee entity.Employee, employee_id str
 func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.Context) (code int, response interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadGateway,
 			Error: "can't open db connection",
 		}
@@ -212,7 +211,7 @@ func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.C
 	// check employee id
 	row, err := db.Query(fmt.Sprintf("SELECT employee_id, password FROM employees WHERE employee_id = %v", strconv.Itoa(loginData.ID)))
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadRequest,
 			Error: "can't get employee data",
 		}
@@ -225,7 +224,7 @@ func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.C
 	for row.Next() {
 		row.Scan(&employee.ID, &employee.Password)
 		if employee.ID == 0 {
-			response := entity.Error {
+			response = entity.Error {
 				Code: http.StatusNotFound,
 				Error: "no employee with given id",
 			}
@@ -236,7 +235,7 @@ func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.C
 	// check employee password
 	// if err = bcrypt.CompareHashAndPassword(employee.Password, []byte(loginData.Password)); err != nil {
 	if (employee.Password != loginData.Password) {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusUnauthorized,
 			Error: "wrong password",
 		}
@@ -250,7 +249,7 @@ func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.C
 
 	token, err := claims.SignedString([]byte(config.GetSecretKey()))
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusInternalServerError,
 			Error: "can't generate token",
 		}
@@ -265,7 +264,7 @@ func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.C
 
 func (service *employeeService) LoginAdmin(loginData entity.LoginEmployee, ctx *gin.Context) (code int, response interface{}) {
 	if loginData.ID != 123 && loginData.Password != "admin" {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusUnauthorized,
 			Error: "unauthorized",
 		}
@@ -279,7 +278,7 @@ func (service *employeeService) LoginAdmin(loginData entity.LoginEmployee, ctx *
 
 	token, err := claims.SignedString([]byte(config.GetAdminKey()))
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusInternalServerError,
 			Error: "can't generate token",
 		}
@@ -301,7 +300,7 @@ func (service *employeeService) Logout(ctx *gin.Context) (code int, response int
 func (service *employeeService) DeleteEmployee(employee_id string) (code int, response interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusBadGateway,
 			Error: "can't open db connection",
 		}
@@ -311,7 +310,7 @@ func (service *employeeService) DeleteEmployee(employee_id string) (code int, re
 
 	_, err = db.Query(fmt.Sprintf("DELETE FROM employees WHERE employee_id = %v", employee_id))
 	if err != nil {
-		response := entity.Error {
+		response = entity.Error {
 			Code: http.StatusNotFound,
 			Error: "no employee with given id",
 		}
