@@ -67,6 +67,9 @@ func main() {
 	api.PUT("/customers/:customer_id", func(c *gin.Context) {
 		customerContoller.PayOffLoan(c)
 	})
+	api.GET("/customers/financial", func(c *gin.Context) {
+		customerContoller.GetFinancialStatements(c)
+	})
 
 	r.GET("/:image_path", func(c *gin.Context) {
 		imageController.ServeImage(c)

@@ -5,12 +5,6 @@ const dashboardStyle = makeStyles((theme) => ({
         display: "flex",
         flexDirection: "column",
     },
-    logout: {
-        display: "flex",
-        textDecoration: "none",
-        alignSelf: "flex-end",
-        marginTop: theme.spacing(3),
-    },
     title: {
         marginTop: theme.spacing(4),
     },

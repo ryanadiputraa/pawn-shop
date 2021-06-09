@@ -7,21 +7,21 @@ import {
     Collapse,
     IconButton,
 } from "@material-ui/core";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Redirect } from "react-router";
-import { Link } from "react-router-dom";
+
 import DataTable from "../Table/DataTable";
 import dashboardStyle from "./dashboard";
 import SearchIcon from "@material-ui/icons/Search";
 import EmployeeTable from "../EmployeeTable/EmployeeTable";
-import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+
 import Alert from "@material-ui/lab/Alert";
 import CloseIcon from "@material-ui/icons/Close";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 import CustomerModal from "../CustomerModal/CustomerModal";
 import EmployeeModal from "../EmployeeModal/EmployeeModal";
+import NavBar from "../NavBar/NavBar";
 
 export default function Dashboard(props) {
     const classes = dashboardStyle();
@@ -106,14 +106,6 @@ export default function Dashboard(props) {
 
     if (redirect) return <Redirect to="/" />;
 
-    const handleLogout = async () => {
-        await fetch("http://localhost:8000/api/logout", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-        });
-    };
-
     const renderDashboard = (tableData) => {
         if (role === "manager")
             return (
@@ -130,144 +122,135 @@ export default function Dashboard(props) {
     };
 
     return (
-        <Container className={classes.container}>
-            <Link className={classes.logout} to="/" onClick={handleLogout}>
-                Logout <ExitToAppIcon />
-            </Link>
-            <Typography
-                className={classes.title}
-                variant="h3"
-                component="h1"
-                align="center"
-                color="primary"
-                gutterBottom
-            >
-                PEGADAIAN
-            </Typography>
-            <Typography
-                className={classes.subTitle}
-                variant="h5"
-                component="h2"
-                align="center"
-                gutterBottom
-            >
-                Sistem Informasi Pegadaian
-            </Typography>
-            <div className={classes.tableTitle}>
+        <>
+            <NavBar role={role} />
+            <Container className={classes.container}>
+                <Typography
+                    className={classes.title}
+                    variant="h3"
+                    component="h1"
+                    align="center"
+                    color="primary"
+                    gutterBottom
+                >
+                    SISTEM INFORMASI PEGADAIAN
+                </Typography>
+                <div className={classes.tableTitle}>
+                    {role === "employee" ? (
+                        <Typography
+                            className={classes.dataTitle}
+                            variant="h6"
+                            component="h5"
+                            align="left"
+                        >
+                            Data Nasabah
+                        </Typography>
+                    ) : (
+                        <Typography
+                            className={classes.dataTitle}
+                            variant="h6"
+                            component="h5"
+                            align="left"
+                        >
+                            Data Karyawan
+                        </Typography>
+                    )}
+                    <TextField
+                        className={classes.search}
+                        onChange={(event) => handleSearch(event)}
+                        label="Cari..."
+                        type="text"
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                </div>
+                <Collapse in={isNotFound} className={classes.warning}>
+                    <Alert
+                        severity="error"
+                        action={
+                            <IconButton
+                                aria-label="close"
+                                color="inherit"
+                                size="small"
+                                onClick={() => setIsNotFound(false)}
+                            >
+                                <CloseIcon fontSize="inherit" />
+                            </IconButton>
+                        }
+                    >
+                        Tidak ada data yang sesuai ditemukan!
+                    </Alert>
+                </Collapse>
+                <Collapse in={isSuccess} className={classes.warning}>
+                    <Alert
+                        severity="success"
+                        action={
+                            <IconButton
+                                aria-label="close"
+                                color="inherit"
+                                size="small"
+                                onClick={() => setIsSuccess(false)}
+                            >
+                                <CloseIcon fontSize="inherit" />
+                            </IconButton>
+                        }
+                    >
+                        Data berhasil disimpan!
+                    </Alert>
+                </Collapse>
+                <Collapse in={isPaymentSuccess} className={classes.warning}>
+                    <Alert
+                        severity="success"
+                        action={
+                            <IconButton
+                                aria-label="close"
+                                color="inherit"
+                                size="small"
+                                onClick={() => setIsPaymentSuccess(false)}
+                            >
+                                <CloseIcon fontSize="inherit" />
+                            </IconButton>
+                        }
+                    >
+                        Proses Pembayaran Berhasil!
+                    </Alert>
+                </Collapse>
+                {isLoading ? <CircularProgress /> : renderDashboard(tableData)}
                 {role === "employee" ? (
-                    <Typography
-                        className={classes.dataTitle}
-                        variant="h6"
-                        component="h5"
-                        align="left"
+                    <Fab
+                        className={classes.fabAdd}
+                        onClick={() => setOpenModal(true)}
+                        color="primary"
+                        aria-label="add"
                     >
-                        Data Nasabah
-                    </Typography>
+                        <AddIcon />
+                    </Fab>
                 ) : (
-                    <Typography
-                        className={classes.dataTitle}
-                        variant="h6"
-                        component="h5"
-                        align="left"
+                    <Fab
+                        className={classes.fabAdd}
+                        onClick={() => setOpenEmployeeModal(true)}
+                        color="primary"
+                        aria-label="add"
                     >
-                        Data Karyawan
-                    </Typography>
+                        <AddIcon />
+                    </Fab>
                 )}
-                <TextField
-                    className={classes.search}
-                    onChange={(event) => handleSearch(event)}
-                    label="Cari..."
-                    type="text"
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <SearchIcon />
-                            </InputAdornment>
-                        ),
-                    }}
+                <CustomerModal
+                    openModal={openModal}
+                    setOpenModal={setOpenModal}
+                    setIsSuccess={setIsSuccess}
                 />
-            </div>
-            <Collapse in={isNotFound} className={classes.warning}>
-                <Alert
-                    severity="error"
-                    action={
-                        <IconButton
-                            aria-label="close"
-                            color="inherit"
-                            size="small"
-                            onClick={() => setIsNotFound(false)}
-                        >
-                            <CloseIcon fontSize="inherit" />
-                        </IconButton>
-                    }
-                >
-                    Tidak ada data yang sesuai ditemukan!
-                </Alert>
-            </Collapse>
-            <Collapse in={isSuccess} className={classes.warning}>
-                <Alert
-                    severity="success"
-                    action={
-                        <IconButton
-                            aria-label="close"
-                            color="inherit"
-                            size="small"
-                            onClick={() => setIsSuccess(false)}
-                        >
-                            <CloseIcon fontSize="inherit" />
-                        </IconButton>
-                    }
-                >
-                    Data berhasil disimpan!
-                </Alert>
-            </Collapse>
-            <Collapse in={isPaymentSuccess} className={classes.warning}>
-                <Alert
-                    severity="success"
-                    action={
-                        <IconButton
-                            aria-label="close"
-                            color="inherit"
-                            size="small"
-                            onClick={() => setIsPaymentSuccess(false)}
-                        >
-                            <CloseIcon fontSize="inherit" />
-                        </IconButton>
-                    }
-                >
-                    Proses Pembayaran Berhasil!
-                </Alert>
-            </Collapse>
-            {isLoading ? <CircularProgress /> : renderDashboard(tableData)}
-            {role === "employee" ? (
-                <Fab
-                    className={classes.fabAdd}
-                    onClick={() => setOpenModal(true)}
-                    color="primary"
-                    aria-label="add"
-                >
-                    <AddIcon />
-                </Fab>
-            ) : (
-                <Fab
-                    className={classes.fabAdd}
-                    onClick={() => setOpenEmployeeModal(true)}
-                    color="primary"
-                    aria-label="add"
-                >
-                    <AddIcon />
-                </Fab>
-            )}
-            <CustomerModal
-                openModal={openModal}
-                setOpenModal={setOpenModal}
-                setIsSuccess={setIsSuccess}
-            />
-            <EmployeeModal
-                openModal={openEmployeeModal}
-                setOpenModal={setOpenEmployeeModal}
-                setIsSuccess={setIsSuccess}
-            />
-        </Container>
+                <EmployeeModal
+                    openModal={openEmployeeModal}
+                    setOpenModal={setOpenEmployeeModal}
+                    setIsSuccess={setIsSuccess}
+                />
+            </Container>
+        </>
     );
 }

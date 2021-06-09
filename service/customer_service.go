@@ -22,7 +22,8 @@ import (
 type CustomerService interface {
 	GetAllCustomer(ctx *gin.Context) (int, interface{})
 	CreateLoan(ctx *gin.Context) (int, interface{})
-	PayOffLoan(customerId string) (int, interface{})
+	PayOffLoan(ctx *gin.Context, customerId string) (int, interface{})
+	GetFinancialStatements(ctx *gin.Context) (int, interface{})
 }
 
 type customerService struct {}
@@ -32,7 +33,6 @@ func NewCustomerService() CustomerService {
 }
 
 func (service *customerService) GetAllCustomer(ctx *gin.Context) (int, interface{}) {
-	// authenticate
 	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
 		response := entity.Error {
@@ -100,6 +100,26 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (int, interface
 }
 
 func (service *customerService) CreateLoan(ctx *gin.Context) (int, interface{}) {
+	cookie, err := ctx.Cookie("jwt")
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusUnauthorized,
+			Error: "no cookie found",
+		}
+		return http.StatusUnauthorized, response
+	}
+
+	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return []byte(config.GetSecretKey()), nil
+	})
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusUnauthorized,
+			Error: "unauthorized",
+		}
+		return http.StatusUnauthorized, response
+	}
+
 	db, err := config.OpenConnection()
 	if err != nil {
 		response := entity.Error {
@@ -206,7 +226,27 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (int, interface{}) 
 	return http.StatusCreated, response
 }
 
-func (service *customerService) PayOffLoan(customerId string) (int, interface{}) {
+func (service *customerService) PayOffLoan(ctx *gin.Context, customerId string) (int, interface{}) {
+	cookie, err := ctx.Cookie("jwt")
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusUnauthorized,
+			Error: "no cookie found",
+		}
+		return http.StatusUnauthorized, response
+	}
+
+	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return []byte(config.GetSecretKey()), nil
+	})
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusUnauthorized,
+			Error: "unauthorized",
+		}
+		return http.StatusUnauthorized, response
+	}
+
 	db, err := config.OpenConnection()
 	if err != nil {
 		response := entity.Error {
@@ -252,4 +292,71 @@ func (service *customerService) PayOffLoan(customerId string) (int, interface{})
 	response := entity.HTTPCode { Code: http.StatusOK }
 
 	return http.StatusOK, response
+}
+
+func (service *customerService) GetFinancialStatements(ctx *gin.Context) (int, interface{}) {
+	cookie, err := ctx.Cookie("jwt")
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusUnauthorized,
+			Error: "no cookie found",
+		}
+		return http.StatusUnauthorized, response
+	}
+
+	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return []byte(config.GetSecretKey()), nil
+	})
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusUnauthorized,
+			Error: "unauthorized",
+		}
+		return http.StatusUnauthorized, response
+	}
+
+	db, err := config.OpenConnection()
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadGateway,
+			Error: "can't open db connection",
+		}
+		return http.StatusBadGateway, response
+	}
+	defer db.Close()
+
+	query := "SELECT SUM (nominal) FROM loans"
+	rows, err := db.Query(query)
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadRequest,
+			Error: "can't get total loans",
+		}
+		return http.StatusBadRequest, response
+	}
+	var financialStatements entity.FinancialStatements
+
+	for rows.Next() {
+		rows.Scan(&financialStatements.TotalLoans)
+	}
+
+	query = "SELECT status, SUM (nominal+interest) AS total FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id GROUP BY status"
+
+	rows, err = db.Query(query)
+	if err != nil {
+		response := entity.Error {
+			Code: http.StatusBadRequest,
+			Error: "can't get financial statements data",
+		}
+		return http.StatusBadRequest, response
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var loanStatus entity.LoanStatements
+		rows.Scan(&loanStatus.Status, &loanStatus.Total)
+		financialStatements.LoanStatus = append(financialStatements.LoanStatus, loanStatus)
+	}
+
+	return http.StatusOK, financialStatements
 }

@@ -10,6 +10,7 @@ type CustomerController interface {
 	GetAllCustomer(ctx *gin.Context)
 	CreateLoan(ctx *gin.Context)
 	PayOffLoan(ctx *gin.Context)
+	GetFinancialStatements(ctx *gin.Context)
 }
 
 type customerContoller struct {
@@ -37,7 +38,12 @@ func (c *customerContoller) CreateLoan(ctx *gin.Context) {
 
 func (c *customerContoller) PayOffLoan(ctx *gin.Context) {
 	customerId := ctx.Param("customer_id")
-	code, response := c.service.PayOffLoan(customerId)
+	code, response := c.service.PayOffLoan(ctx, customerId)
 
+	helper.WriteResponse(ctx, code, response)
+}
+ 
+func (c *customerContoller) GetFinancialStatements(ctx *gin.Context) {
+	code, response := c.service.GetFinancialStatements(ctx)
 	helper.WriteResponse(ctx, code, response)
 }
