@@ -13,14 +13,14 @@ import (
 )
 const SecretKey = "secret"
 type EmployeeService interface {
-	GetAllEmployees(ctx *gin.Context) (int, interface{})
-	GetEmployeeById(employee_id string) (int, interface{})
-	Register(entity.Employee) (int, interface{})
-	Update(employee entity.Employee, employee_id string) (int, interface{})
-	Login(loginData entity.LoginEmployee, ctx *gin.Context) (int, interface{})
-	LoginAdmin(loginData entity.LoginEmployee, ctx *gin.Context) (int, interface{})
-	Logout(ctx *gin.Context) (int, interface{})
-	DeleteEmployee(employee_id string) (int, interface{})
+	GetAllEmployees(ctx *gin.Context) (code int, response interface{})
+	GetEmployeeById(employee_id string) (code int, response interface{})
+	Register(entity.Employee) (code int, response interface{})
+	Update(employee entity.Employee, employee_id string) (code int, response interface{})
+	Login(loginData entity.LoginEmployee, ctx *gin.Context) (code int, response interface{})
+	LoginAdmin(loginData entity.LoginEmployee, ctx *gin.Context) (code int, response interface{})
+	Logout(ctx *gin.Context) (code int, response interface{})
+	DeleteEmployee(employee_id string) (code int, response interface{})
 }
 
 type employeeService struct {}
@@ -29,7 +29,7 @@ func NewEmployeeService() EmployeeService {
 	return &employeeService{}
 }
 
-func (service *employeeService) GetAllEmployees(ctx *gin.Context) (int, interface{}) {
+func (service *employeeService) GetAllEmployees(ctx *gin.Context) (code int, response interface{}) {
 	// authenticate
 	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
@@ -97,7 +97,7 @@ func (service *employeeService) GetAllEmployees(ctx *gin.Context) (int, interfac
 	return http.StatusOK, employees
 }
 
-func (service *employeeService) GetEmployeeById(employee_id string) (int, interface{}) {
+func (service *employeeService) GetEmployeeById(employee_id string) (code int, response interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
 		response := entity.Error {
@@ -132,7 +132,7 @@ func (service *employeeService) GetEmployeeById(employee_id string) (int, interf
 	return http.StatusOK, employee
 }
 
-func (service *employeeService) Register(employee entity.Employee) (int, interface{}) {
+func (service *employeeService) Register(employee entity.Employee) (code int, response interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
 		response := entity.Error {
@@ -163,13 +163,13 @@ func (service *employeeService) Register(employee entity.Employee) (int, interfa
 		return http.StatusBadRequest, response
 	}
 
-	response := entity.HTTPCode {
+	response = entity.HTTPCode {
 		Code: http.StatusCreated,
 	}
 	return http.StatusCreated, response
 }
 
-func (service *employeeService) Update(employee entity.Employee, employee_id string) (int, interface{}) {
+func (service *employeeService) Update(employee entity.Employee, employee_id string) (code int, response interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
 		response := entity.Error {
@@ -192,13 +192,13 @@ func (service *employeeService) Update(employee entity.Employee, employee_id str
 		return http.StatusBadRequest, response
 	}
 
-	response := entity.HTTPCode {
+	response = entity.HTTPCode {
 		Code: http.StatusOK,
 	}
 	return http.StatusOK, response
 }
 
-func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.Context) (int, interface{}) {
+func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.Context) (code int, response interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
 		response := entity.Error {
@@ -258,12 +258,12 @@ func (service *employeeService) Login(loginData entity.LoginEmployee, ctx *gin.C
 	}
 
 	ctx.SetCookie("jwt", token, 60*60*24, "", "", true, true)
-	response := entity.HTTPCode { Code: http.StatusAccepted }
+	response = entity.HTTPCode { Code: http.StatusAccepted }
 
 	return http.StatusAccepted, response
 }
 
-func (service *employeeService) LoginAdmin(loginData entity.LoginEmployee, ctx *gin.Context) (int, interface{}) {
+func (service *employeeService) LoginAdmin(loginData entity.LoginEmployee, ctx *gin.Context) (code int, response interface{}) {
 	if loginData.ID != 123 && loginData.Password != "admin" {
 		response := entity.Error {
 			Code: http.StatusUnauthorized,
@@ -287,18 +287,18 @@ func (service *employeeService) LoginAdmin(loginData entity.LoginEmployee, ctx *
 	}
 
 	ctx.SetCookie("jwt", token, 60*60*24, "", "", true, true)
-	response := entity.HTTPCode { Code: http.StatusAccepted }
+	response = entity.HTTPCode { Code: http.StatusAccepted }
 
 	return http.StatusAccepted, response
 }
 
-func (service *employeeService) Logout(ctx *gin.Context) (int, interface{}) {
+func (service *employeeService) Logout(ctx *gin.Context) (code int, response interface{}) {
 	ctx.SetCookie("jwt", "", 60, "", "", true, true)
-	response := entity.HTTPCode { Code: http.StatusOK }
+	response = entity.HTTPCode { Code: http.StatusOK }
 	return http.StatusOK, response
 }
 
-func (service *employeeService) DeleteEmployee(employee_id string) (int, interface{}) {
+func (service *employeeService) DeleteEmployee(employee_id string) (code int, response interface{}) {
 	db, err := config.OpenConnection()
 	if err != nil {
 		response := entity.Error {
@@ -318,7 +318,7 @@ func (service *employeeService) DeleteEmployee(employee_id string) (int, interfa
 		return http.StatusNotFound, response
 	}
 
-	response := entity.HTTPCode { Code: http.StatusOK }
+	response = entity.HTTPCode { Code: http.StatusOK }
 
 	return http.StatusOK, response
 }

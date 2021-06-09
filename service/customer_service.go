@@ -20,10 +20,10 @@ import (
 )
 
 type CustomerService interface {
-	GetAllCustomer(ctx *gin.Context) (int, interface{})
-	CreateLoan(ctx *gin.Context) (int, interface{})
-	PayOffLoan(ctx *gin.Context, customerId string) (int, interface{})
-	GetFinancialStatements(ctx *gin.Context) (int, interface{})
+	GetAllCustomer(ctx *gin.Context) (code int, response interface{})
+	CreateLoan(ctx *gin.Context) (code int, response interface{})
+	PayOffLoan(ctx *gin.Context, customerId string) (code int, response interface{})
+	GetFinancialStatements(ctx *gin.Context) (code int, response interface{})
 }
 
 type customerService struct {}
@@ -32,7 +32,7 @@ func NewCustomerService() CustomerService {
 	return &customerService{}
 }
 
-func (service *customerService) GetAllCustomer(ctx *gin.Context) (int, interface{}) {
+func (service *customerService) GetAllCustomer(ctx *gin.Context) (code int, response interface{}) {
 	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
 		response := entity.Error {
@@ -99,7 +99,7 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (int, interface
 	return http.StatusOK, customers
 }
 
-func (service *customerService) CreateLoan(ctx *gin.Context) (int, interface{}) {
+func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response interface{}) {
 	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
 		response := entity.Error {
@@ -221,12 +221,12 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (int, interface{}) 
 		return http.StatusBadRequest, response	
 	}	
 
-	response := entity.HTTPCode { Code: http.StatusCreated }
+	response = entity.HTTPCode { Code: http.StatusCreated }
 
 	return http.StatusCreated, response
 }
 
-func (service *customerService) PayOffLoan(ctx *gin.Context, customerId string) (int, interface{}) {
+func (service *customerService) PayOffLoan(ctx *gin.Context, customerId string) (code int, response interface{}) {
 	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
 		response := entity.Error {
@@ -289,12 +289,12 @@ func (service *customerService) PayOffLoan(ctx *gin.Context, customerId string) 
 		return http.StatusBadRequest, response
 	}
 	
-	response := entity.HTTPCode { Code: http.StatusOK }
+	response = entity.HTTPCode { Code: http.StatusOK }
 
 	return http.StatusOK, response
 }
 
-func (service *customerService) GetFinancialStatements(ctx *gin.Context) (int, interface{}) {
+func (service *customerService) GetFinancialStatements(ctx *gin.Context) (code int, response interface{}) {
 	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
 		response := entity.Error {

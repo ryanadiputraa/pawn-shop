@@ -7,20 +7,18 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func GetSecretKey() string {
+func GetSecretKey() (secretKey string) {
 	if err := godotenv.Load(".env"); err != nil {
 		log.Fatal(err)
 	}
 
-	secretKey := os.Getenv("SECRET_KEY")
-	return secretKey
+	return os.Getenv("SECRET_KEY")
 }
 
-func GetAdminKey() string {
+func GetAdminKey() (secretKey string) {
 	if err := godotenv.Load(".env"); err != nil {
 		log.Fatal(err)
 	}
 
-	secretKey := os.Getenv("ADMIN_KEY")
-	return secretKey
+	return os.Getenv("ADMIN_KEY")
 }
