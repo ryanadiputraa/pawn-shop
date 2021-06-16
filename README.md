@@ -19,19 +19,26 @@ Pawn Shop is a information system for managing Pawn Shop Information System data
 -   Response :
 
 ```json
-{
-    [
-        {
-            "employee_id": "Number",
-            "firstname": "String",
-            "lastname": "String",
-            "gender": ("pria" || "wanita"),
-            "birthdate": "YYYY-MM-DD",
-            "address": "String",
-            "password": "String"
-        }
-    ]
-}
+[
+    {
+        "employee_id": "Number",
+        "firstname": "String",
+        "lastname": "String",
+        "gender": ("pria" || "wanita"),
+        "birthdate": "YYYY-MM-DD",
+        "address": "String",
+        "password": "String"
+    },
+    {
+        "employee_id": "Number",
+        "firstname": "String",
+        "lastname": "String",
+        "gender": ("pria" || "wanita"),
+        "birthdate": "YYYY-MM-DD",
+        "address": "String",
+        "password": "String"
+    }
+]
 ```
 
 ### Get Employee by Id
@@ -170,19 +177,26 @@ Pawn Shop is a information system for managing Pawn Shop Information System data
 -   Response :
 
 ```json
-{
-    [
-        {
-             "customer_id": "String",
-             "firstname": "String",
-             "lastname": "String",
-             "gender": ("pria" || "wanita"),
-             "loan": "String",
-             "insurance_item": "String",
-             "contact": "String",
-        }
-    ]
-}
+[
+    {
+            "customer_id": "String",
+            "firstname": "String",
+            "lastname": "String",
+            "gender": ("pria" || "wanita"),
+            "loan": "String",
+            "insurance_item": "String",
+            "contact": "String",
+    },
+    {
+            "customer_id": "String",
+            "firstname": "String",
+            "lastname": "String",
+            "gender": ("pria" || "wanita"),
+            "loan": "String",
+            "insurance_item": "String",
+            "contact": "String",
+    }
+]
 ```
 
 ## Loans
