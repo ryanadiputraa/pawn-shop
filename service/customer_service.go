@@ -87,7 +87,7 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (code int, resp
 		rows.Scan(&customer.CustomerId, &customer.Firstname, &customer.Lastname, &customer.Gender, &customer.Contact, &customer.Loan, &customer.Interest, &customer.InsuranceItem, &customer.ItemStatus, &customer.Image)
 		customers = append(customers, customer)
 	}
-	defer rows.Close()
+	
 	if customers == nil {
 		response = entity.Error {
 			Code: http.StatusNotFound,
