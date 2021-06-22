@@ -17,7 +17,8 @@ var (
 	employeeController controller.EmployeeController = controller.NewEmployeeController(employeeService)
 	customerService service.CustomerService = service.NewCustomerService()
 	customerContoller controller.CustomerController = controller.NewCustomerController(customerService)
-	imageController controller.ImageController = controller.NewImageController()
+	imageService service.ImageService = service.NewImageService()
+	imageController controller.ImageController = controller.NewImageController(imageService)
 )
 
 func init() {
