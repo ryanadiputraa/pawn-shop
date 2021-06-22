@@ -30,14 +30,11 @@ func NewEmployeeController(service service.EmployeeService) EmployeeController {
 
 func (c *employeeController) GetAllEmployees(ctx *gin.Context) {
 	code, response := c.service.GetAllEmployees(ctx)
-
 	helper.WriteResponse(ctx, code, response)
 }
 
 func (c *employeeController) GetEmployeeById(ctx *gin.Context) {
-	employeeId := ctx.Param("employee_id")
-	code, response := c.service.GetEmployeeById(employeeId)
-
+	code, response := c.service.GetEmployeeById(ctx)
 	helper.WriteResponse(ctx, code, response)
 }
 

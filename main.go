@@ -9,11 +9,13 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/ryanadiputraa/pawn-shop/controller"
 	"github.com/ryanadiputraa/pawn-shop/middlewares"
+	"github.com/ryanadiputraa/pawn-shop/repository"
 	"github.com/ryanadiputraa/pawn-shop/service"
 )
 
 var (
-	employeeService service.EmployeeService = service.NewEmployeeService()
+	employeeRepository repository.EmployeeRepository = repository.NewEmployeeRepository()
+	employeeService service.EmployeeService = service.NewEmployeeService(employeeRepository)
 	employeeController controller.EmployeeController = controller.NewEmployeeController(employeeService)
 	customerService service.CustomerService = service.NewCustomerService()
 	customerContoller controller.CustomerController = controller.NewCustomerController(customerService)

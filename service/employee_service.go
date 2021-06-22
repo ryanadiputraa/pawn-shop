@@ -10,11 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ryanadiputraa/pawn-shop/config"
 	"github.com/ryanadiputraa/pawn-shop/entity"
+	"github.com/ryanadiputraa/pawn-shop/repository"
 )
 const SecretKey = "secret"
 type EmployeeService interface {
 	GetAllEmployees(ctx *gin.Context) (code int, response interface{})
-	GetEmployeeById(employee_id string) (code int, response interface{})
+	GetEmployeeById(ctx *gin.Context) (code int, response interface{})
 	Register(entity.Employee) (code int, response interface{})
 	Update(employee entity.Employee, employee_id string) (code int, response interface{})
 	Login(loginData entity.LoginEmployee, ctx *gin.Context) (code int, response interface{})
@@ -23,14 +24,17 @@ type EmployeeService interface {
 	DeleteEmployee(employee_id string) (code int, response interface{})
 }
 
-type employeeService struct {}
+type employeeService struct {
+	repository repository.EmployeeRepository
+}
 
-func NewEmployeeService() EmployeeService {
-	return &employeeService{}
+func NewEmployeeService(repository repository.EmployeeRepository) EmployeeService {
+	return &employeeService{
+		repository: repository,
+	}
 }
 
 func (service *employeeService) GetAllEmployees(ctx *gin.Context) (code int, response interface{}) {
-	// authenticate
 	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
 		response = entity.Error {
@@ -51,85 +55,58 @@ func (service *employeeService) GetAllEmployees(ctx *gin.Context) (code int, res
 		return http.StatusUnauthorized, response
 	}
 
-	db, err := config.OpenConnection()
+	employees, code, err := service.repository.GetAll(ctx)
 	if err != nil {
 		response = entity.Error {
-			Code: http.StatusBadGateway,
-			Error: "can't open db connection",
+			Code: code,
+			Error: err.Error(),
 		}
-		return http.StatusBadGateway, response
-	}
-	defer db.Close()
-
-	var query string
-	URLQueryParam := ctx.Request.URL.Query()
-	if len(URLQueryParam) != 0 {
-		query = fmt.Sprintf("SELECT * FROM employees WHERE CAST(employee_id AS TEXT) LIKE '%v%%' OR LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%') OR LOWER(gender) LIKE LOWER('%v%%') OR CAST(birthdate AS TEXT) LIKE '%v%%' OR LOWER(address) LIKE LOWER('%v%%') OR LOWER(password) LIKE LOWER('%v%%')", URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0], URLQueryParam["query"][0])
-	} else {
-		query = `SELECT * FROM employees`
+		return code, response	
 	}
 
-	rows, err := db.Query(query)
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusBadRequest,
-			Error: "can't get employees data",
-		}
-		return http.StatusBadRequest, response
-	}
-	defer rows.Close()
-
-	var employees []entity.Employee
-	for rows.Next() {
-		var employee entity.Employee
-		rows.Scan(&employee.ID, &employee.Firstname, &employee.Lastname, &employee.Gender, &employee.Birthdate, &employee.Address, &employee.Password)
-		employees = append(employees, employee)
-	}
-	defer rows.Close()
 	if employees == nil {
 		response = entity.Error {
 			Code: http.StatusNotFound,
-			Error: "no employee with given name",
+			Error: "no employee found",
 		}
 		return http.StatusNotFound, response
 	}
 
-	return http.StatusOK, employees
+	return code, employees
 }
 
-func (service *employeeService) GetEmployeeById(employee_id string) (code int, response interface{}) {
-	db, err := config.OpenConnection()
+func (service *employeeService) GetEmployeeById(ctx *gin.Context) (code int, response interface{}) {
+	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
 		response = entity.Error {
-			Code: http.StatusBadGateway,
-			Error: "can't open db connection",
+			Code: http.StatusUnauthorized,
+			Error: "no cookie found",
 		}
-		return http.StatusBadGateway, response
+		return http.StatusUnauthorized, response
 	}
-	defer db.Close()
 
-	row, err := db.Query(fmt.Sprintf("SELECT * FROM employees WHERE employee_id = %v", employee_id))
+	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return []byte(config.GetAdminKey()), nil
+	})
 	if err != nil {
 		response = entity.Error {
-			Code: http.StatusBadRequest,
-			Error: "can't get employee data",
+			Code: http.StatusUnauthorized,
+			Error: "unauthorized",
 		}
-		return http.StatusBadRequest, response
+		return http.StatusUnauthorized, response
 	}
-	defer row.Close()
-
-	var employee entity.Employee
-	isNotNull := row.Next()
-	if !isNotNull {
-		response = entity.Error {
-			Code: http.StatusNotFound,
-			Error: "no employee with given id",
-		}
-		return http.StatusNotFound, response	
-	}
-	row.Scan(&employee.ID, &employee.Firstname, &employee.Lastname, &employee.Gender, &employee.Birthdate, &employee.Address, &employee.Password)
 	
-	return http.StatusOK, employee
+	employeeId := ctx.Param("employee_id")
+	employee, code, err := service.repository.GetById(employeeId)
+	if err != nil {
+		response = entity.Error {
+			Code: code,
+			Error: err.Error(),
+		}
+		return code, response
+	}
+
+	return code, employee
 }
 
 func (service *employeeService) Register(employee entity.Employee) (code int, response interface{}) {
