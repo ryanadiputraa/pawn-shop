@@ -2,7 +2,6 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ryanadiputraa/pawn-shop/entity"
 	"github.com/ryanadiputraa/pawn-shop/helper"
 	"github.com/ryanadiputraa/pawn-shop/service"
 )
@@ -39,35 +38,22 @@ func (c *employeeController) GetEmployeeById(ctx *gin.Context) {
 }
 
 func (c *employeeController) Register(ctx *gin.Context) {
-	var employee entity.Employee
-	ctx.BindJSON(&employee)
-	code, response := c.service.Register(employee)
-
+	code, response := c.service.Register(ctx)
 	helper.WriteResponse(ctx, code, response)
 }
 
 func (c *employeeController) Update(ctx *gin.Context) {
-	employeeId := ctx.Param("employee_id")
-	var employee entity.Employee
-	ctx.BindJSON(&employee)
-	code, response := c.service.Update(employee, employeeId)
-
+	code, response := c.service.Update(ctx)
 	helper.WriteResponse(ctx, code, response)
 }
 
 func (c *employeeController) Login(ctx *gin.Context) {
-	var loginData entity.LoginEmployee
-	ctx.BindJSON(&loginData)
-	code, response := c.service.Login(loginData, ctx)
-
+	code, response := c.service.Login(ctx)
 	helper.WriteResponse(ctx, code, response)
 }
 
 func (c *employeeController) LoginAdmin(ctx *gin.Context) {
-	var loginData entity.LoginEmployee
-	ctx.BindJSON(&loginData)
-	code, response := c.service.LoginAdmin(loginData, ctx)
-
+	code, response := c.service.LoginAdmin(ctx)
 	helper.WriteResponse(ctx, code, response)
 }
 
@@ -77,8 +63,6 @@ func (c *employeeController) Logout(ctx *gin.Context) {
 }
 
 func (c *employeeController) DeleteEmployee(ctx *gin.Context) {
-	employeeId := ctx.Param("employee_id")
-	code, response := c.service.DeleteEmployee(employeeId)
-
+	code, response := c.service.DeleteEmployee(ctx)
 	helper.WriteResponse(ctx, code, response)
 }
