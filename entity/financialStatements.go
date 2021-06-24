@@ -1,7 +1,7 @@
 package entity
 
 type FinancialStatements struct {
-	TotalLoans		int				`json:"totalLoans"`
+	TotalLoans		int					`json:"totalLoans"`
 	LoanStatus		[]LoanStatements	`json:"loanStatus"`
 }
 

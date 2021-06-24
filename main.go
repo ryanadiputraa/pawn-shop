@@ -14,11 +14,17 @@ import (
 )
 
 var (
+	// employees
 	employeeRepository repository.EmployeeRepository = repository.NewEmployeeRepository()
 	employeeService service.EmployeeService = service.NewEmployeeService(employeeRepository)
 	employeeController controller.EmployeeController = controller.NewEmployeeController(employeeService)
-	customerService service.CustomerService = service.NewCustomerService()
+
+	// customers
+	customerRepository repository.CustomerRepository = repository.NewCustomerRepository()
+	customerService service.CustomerService = service.NewCustomerService(customerRepository)
 	customerContoller controller.CustomerController = controller.NewCustomerController(customerService)
+
+	// images
 	imageService service.ImageService = service.NewImageService()
 	imageController controller.ImageController = controller.NewImageController(imageService)
 )

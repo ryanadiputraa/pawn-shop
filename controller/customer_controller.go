@@ -17,7 +17,6 @@ type customerContoller struct {
 	service service.CustomerService
 }
 
-
 func NewCustomerController(service service.CustomerService) CustomerController {
 	return &customerContoller{
 		service: service,
@@ -26,20 +25,16 @@ func NewCustomerController(service service.CustomerService) CustomerController {
 
 func (c *customerContoller) GetAllCustomer(ctx *gin.Context) {
 	code, response := c.service.GetAllCustomer(ctx)
-
 	helper.WriteResponse(ctx, code, response)
 }
 
 func (c *customerContoller) CreateLoan(ctx *gin.Context) {
 	code, response := c.service.CreateLoan(ctx)
-
 	helper.WriteResponse(ctx, code, response)
 }
 
 func (c *customerContoller) PayOffLoan(ctx *gin.Context) {
-	customerId := ctx.Param("customer_id")
-	code, response := c.service.PayOffLoan(ctx, customerId)
-
+	code, response := c.service.PayOffLoan(ctx)
 	helper.WriteResponse(ctx, code, response)
 }
  
