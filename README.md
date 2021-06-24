@@ -99,7 +99,6 @@ Pawn Shop is a information system for managing Pawn Shop Information System data
 -   Header :
     -   Content-Type : `application/json`
     -   Accept : `application/json`
-    -   X-Access-Token: `token`
 -   Body :
 
 ```json
