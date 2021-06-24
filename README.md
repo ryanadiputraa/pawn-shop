@@ -246,20 +246,3 @@ Pawn Shop is a information system for managing Pawn Shop Information System data
     "code": "Number"
 }
 ```
-
-<!--
-### Bail Auction
-
--   Method : `PUT`
--   Endpoint : `/api/loans/{customer_id}`
--   Header :
-    -   Content-Type : `application/json`
-    -   Accept : `application/json`
-    -   X-Access-Token: `token`
--   Response :
-
-```json
-{
-    "code": "Number"
-}
-``` -->
