@@ -54,7 +54,13 @@ func (service *employeeService) GetAllEmployees(ctx *gin.Context) (code int, res
 		return http.StatusUnauthorized, response
 	}
 
-	employees, code, err := service.repository.GetAll(ctx)
+	URLQuery := ctx.Request.URL.Query()
+	var queryParam string
+	if len(URLQuery) > 0 {
+		queryParam = URLQuery["query"][0]
+	}
+
+	employees, code, err := service.repository.GetAll(queryParam)
 	if err != nil {
 		response = entity.Error {
 			Code: code,

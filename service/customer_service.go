@@ -58,7 +58,13 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (code int, resp
 		return http.StatusUnauthorized, response
 	}
 	
-	customers, code, err := service.repository.GetAll(ctx)
+	URLQuery := ctx.Request.URL.Query()
+	var queryParam string
+	if len(URLQuery) > 0 {
+		queryParam = URLQuery["query"][0]
+	}
+
+	customers, code, err := service.repository.GetAll(queryParam)
 	if err != nil {
 		response = entity.Error {
 			Code: code,

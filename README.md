@@ -92,30 +92,6 @@ Pawn Shop is a information system for managing Pawn Shop Information System data
 }
 ```
 
-### Login Employee
-
--   Method : `POST`
--   Endpoint : `/api/employees/login`
--   Header :
-    -   Content-Type : `application/json`
-    -   Accept : `application/json`
--   Body :
-
-```json
-{
-    "employee_id": "Number",
-    "password": "String"
-}
-```
-
--   Response :
-
-```json
-{
-    "code": "Number"
-}
-```
-
 ### Update Employee
 
 -   Method : `PUT`
@@ -161,6 +137,45 @@ Pawn Shop is a information system for managing Pawn Shop Information System data
 }
 ```
 
+### Login Employee
+
+-   Method : `POST`
+-   Endpoint : `/api/employees/login`
+-   Header :
+    -   Content-Type : `application/json`
+    -   Accept : `application/json`
+-   Body :
+
+```json
+{
+    "employee_id": "Number",
+    "password": "String"
+}
+```
+
+-   Response :
+
+```json
+{
+    "code": "Number"
+}
+```
+
+### Logout Employee
+
+-   Method : `POST`
+-   Endpoint : `/api/employees/logout`
+-   Header :
+    -   Content-Type : `application/json`
+    -   Accept : `application/json`
+-   Response :
+
+```json
+{
+    "code": "Number"
+}
+```
+
 ---
 
 ## Customers
@@ -198,12 +213,10 @@ Pawn Shop is a information system for managing Pawn Shop Information System data
 ]
 ```
 
-## Loans
-
 ### Add Loan
 
 -   Method : `POST`
--   Endpoint : `/api/loans`
+-   Endpoint : `/api/customers/{customer_id}`
 -   Header :
     -   Content-Type : `application/json`
     -   Accept : `application/json`
@@ -234,7 +247,7 @@ Pawn Shop is a information system for managing Pawn Shop Information System data
 ### Pay Off The Loan
 
 -   Method : `PUT`
--   Endpoint : `/api/loans/{customer_id}`
+-   Endpoint : `/api/customers/{customer_id}`
 -   Header :
     -   Content-Type : `application/json`
     -   Accept : `application/json`
@@ -244,5 +257,31 @@ Pawn Shop is a information system for managing Pawn Shop Information System data
 ```json
 {
     "code": "Number"
+}
+```
+
+### Get Financial Statements
+
+-   Method : `GET`
+-   Endpoint : `/api/customers/financial`
+-   Header :
+    -   Content-Type : `application/json`
+    -   Accept : `application/json`
+    -   X-Access-Token: `token`
+-   Response :
+
+```json
+{
+    "totalLoans": "Number",
+    "loanStatus": [
+        {
+            "status": "String",
+            "total": "Number"
+        },
+        {
+            "status": "String",
+            "total": "Number"
+        }
+    ]
 }
 ```

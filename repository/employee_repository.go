@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"github.com/ryanadiputraa/pawn-shop/config"
 	"github.com/ryanadiputraa/pawn-shop/entity"
 )
 
 type EmployeeRepository interface {
-	GetAll(ctx *gin.Context) (employees []entity.Employee, code int, err error) 
+	GetAll(queryParam string) (employees []entity.Employee, code int, err error) 
 	GetById(employeeId string) (employee entity.Employee, code int, err error) 
 	Create(employee entity.Employee) (code int, err error)
 	Update(employee entity.Employee) (code int, err error)
@@ -26,17 +25,16 @@ func NewEmployeeRepository() EmployeeRepository {
 	return &employeeRepository{}
 }
 
-func (r *employeeRepository) GetAll(ctx *gin.Context) (employees []entity.Employee, code int, err error) {
+func (r *employeeRepository) GetAll(queryParam string) (employees []entity.Employee, code int, err error) {
 	db, err := config.OpenConnection()
 	if err != nil {
 		return employees, http.StatusBadGateway, err
 	}
 	defer db.Close()
 
-	param := ctx.Request.URL.Query()
 	var query string
-	if len(param) != 0 {
-		query = fmt.Sprintf("SELECT * FROM employees WHERE CAST(employee_id AS TEXT) LIKE '%v%%' OR LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%') OR LOWER(gender) LIKE LOWER('%v%%') OR CAST(birthdate AS TEXT) LIKE '%v%%' OR LOWER(address) LIKE LOWER('%v%%') OR LOWER(password) LIKE LOWER('%v%%')", param["query"][0], param["query"][0], param["query"][0], param["query"][0], param["query"][0], param["query"][0], param["query"][0])
+	if len(queryParam) > 0 {
+		query = fmt.Sprintf("SELECT * FROM employees WHERE CAST(employee_id AS TEXT) LIKE '%v%%' OR LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%') OR LOWER(gender) LIKE LOWER('%v%%') OR CAST(birthdate AS TEXT) LIKE '%v%%' OR LOWER(address) LIKE LOWER('%v%%') OR LOWER(password) LIKE LOWER('%v%%')", queryParam, queryParam, queryParam, queryParam, queryParam, queryParam, queryParam)
 	} else {
 		query = `SELECT * FROM employees`
 	}

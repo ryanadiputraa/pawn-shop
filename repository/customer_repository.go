@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/ryanadiputraa/pawn-shop/config"
 	"github.com/ryanadiputraa/pawn-shop/entity"
 )
 
 type CustomerRepository interface {
-	GetAll(ctx *gin.Context) (customers []entity.Customer, code int, err error)
+	GetAll(queryParam string) (customers []entity.Customer, code int, err error)
 	CreateLoan(loanId uuid.UUID, itemId uuid.UUID, customer entity.Customer) (code int, err error)
 	PayOffLoan(customerId uuid.UUID) (code int, err error)
 	GetFinancialStatements() (financialStatements entity.FinancialStatements, code int, err error)
@@ -25,7 +24,7 @@ func NewCustomerRepository() CustomerRepository {
 	return &customerRepository{}
 }
 
-func (r *customerRepository) GetAll(ctx *gin.Context) (customers []entity.Customer, code int, err error) {
+func (r *customerRepository) GetAll(queryParam string) (customers []entity.Customer, code int, err error) {
 	db, err := config.OpenConnection()
 	if err != nil {
 		return nil, http.StatusBadGateway, err
@@ -34,9 +33,8 @@ func (r *customerRepository) GetAll(ctx *gin.Context) (customers []entity.Custom
 
 
 	var query string
-	param := ctx.Request.URL.Query()
-	if len(param) != 0 {
-		query = fmt.Sprintf("SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status, image FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id WHERE LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%') OR LOWER(gender) LIKE LOWER('%v%%') OR contact LIKE '%v%%' OR CAST(nominal as TEXT) LIKE '%v%%' OR CAST((nominal + interest) AS TEXT) LIKE '%v%%' OR LOWER(item_name) LIKE LOWER('%v%%') OR LOWER(status) LIKE LOWER('%v%%')", param["query"][0], param["query"][0], param["query"][0], param["query"][0], param["query"][0], param["query"][0], param["query"][0], param["query"][0])
+	if len(queryParam) > 0 {
+		query = fmt.Sprintf("SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status, image FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id WHERE LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%') OR LOWER(gender) LIKE LOWER('%v%%') OR contact LIKE '%v%%' OR CAST(nominal as TEXT) LIKE '%v%%' OR CAST((nominal + interest) AS TEXT) LIKE '%v%%' OR LOWER(item_name) LIKE LOWER('%v%%') OR LOWER(status) LIKE LOWER('%v%%')", queryParam, queryParam, queryParam, queryParam, queryParam, queryParam, queryParam, queryParam)
 	} else {
 		query = `SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status, image FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id`
 	}
