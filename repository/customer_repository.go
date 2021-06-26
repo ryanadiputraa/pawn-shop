@@ -34,7 +34,7 @@ func (r *customerRepository) GetAll(queryParam string) (customers []entity.Custo
 
 	var query string
 	if len(queryParam) > 0 {
-		query = fmt.Sprintf("SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status, image FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id WHERE LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%') OR LOWER(gender) LIKE LOWER('%v%%') OR contact LIKE '%v%%' OR CAST(nominal as TEXT) LIKE '%v%%' OR CAST((nominal + interest) AS TEXT) LIKE '%v%%' OR LOWER(item_name) LIKE LOWER('%v%%') OR LOWER(status) LIKE LOWER('%v%%')", queryParam, queryParam, queryParam, queryParam, queryParam, queryParam, queryParam, queryParam)
+		query = fmt.Sprintf("SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status, image FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id WHERE LOWER(firstname) LIKE LOWER('%v%%') OR LOWER(lastname) LIKE LOWER('%v%%')", queryParam, queryParam)
 	} else {
 		query = `SELECT customer_id, firstname, lastname, gender, contact, nominal, interest, item_name, status, image FROM customers INNER JOIN loans ON loan = loan_id INNER JOIN insurance_items ON insurance_item = item_id`
 	}

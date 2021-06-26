@@ -63,6 +63,28 @@ Pawn Shop is a information system for managing Pawn Shop Information System data
 }
 ```
 
+### Get Employee by Name
+
+-   Method : `GET`
+-   Endpoint : `/api/employees/{employee_name}`
+-   Header :
+    -   Content-Type : `application/json`
+    -   Accept : `application/json`
+    -   X-Access-Token: `token`
+-   Response :
+
+```json
+{
+    "employee_id": "Number",
+    "firstname": "String",
+    "lastname": "String",
+    "gender": ("pria" || "wanita"),
+    "birthdate": "YYYY-MM-DD",
+    "address": "String",
+    "password": "String"
+}
+```
+
 ### Register Employee
 
 -   Method : `POST`
@@ -210,6 +232,39 @@ Pawn Shop is a information system for managing Pawn Shop Information System data
             "insurance_item": "String",
             "contact": "String",
     }
+]
+```
+
+### Get Customer Data By Name
+
+-   Method : `GET`
+-   Endpoint : `/api/customers/{customer_name}`
+-   Header :
+    -   Content-Type : `application/json`
+    -   Accept : `application/json`
+    -   X-Access-Token: `token`
+-   Response :
+
+```json
+[
+    {
+        "customer_id": "String",
+        "firstname": "String",
+        "lastname": "String",
+        "gender": ("pria" || "wanita"),
+        "loan": "String",
+        "insurance_item": "String",
+        "contact": "String",
+    },
+    {
+        "customer_id": "String",
+        "firstname": "String",
+        "lastname": "String",
+        "gender": ("pria" || "wanita"),
+        "loan": "String",
+        "insurance_item": "String",
+        "contact": "String",
+    },
 ]
 ```
 
