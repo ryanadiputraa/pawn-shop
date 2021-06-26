@@ -13,7 +13,6 @@ type EmployeeController interface {
 	GetEmployeeById(ctx *gin.Context)
 	DeleteEmployee(ctx *gin.Context)
 	Login(ctx *gin.Context)
-	LoginAdmin(ctx *gin.Context)
 	Logout(ctx *gin.Context)
 }
 
@@ -49,11 +48,6 @@ func (c *employeeController) Update(ctx *gin.Context) {
 
 func (c *employeeController) Login(ctx *gin.Context) {
 	code, response := c.service.Login(ctx)
-	helper.WriteResponse(ctx, code, response)
-}
-
-func (c *employeeController) LoginAdmin(ctx *gin.Context) {
-	code, response := c.service.LoginAdmin(ctx)
 	helper.WriteResponse(ctx, code, response)
 }
 

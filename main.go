@@ -8,24 +8,24 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/ryanadiputraa/pawn-shop/controller"
-	"github.com/ryanadiputraa/pawn-shop/middlewares"
+	"github.com/ryanadiputraa/pawn-shop/middleware"
 	"github.com/ryanadiputraa/pawn-shop/repository"
 	"github.com/ryanadiputraa/pawn-shop/service"
 )
 
 var (
-	// employees
+	// repository
 	employeeRepository repository.EmployeeRepository = repository.NewEmployeeRepository()
-	employeeService service.EmployeeService = service.NewEmployeeService(employeeRepository)
-	employeeController controller.EmployeeController = controller.NewEmployeeController(employeeService)
-
-	// customers
 	customerRepository repository.CustomerRepository = repository.NewCustomerRepository()
+	
+	// service
+	employeeService service.EmployeeService = service.NewEmployeeService(employeeRepository)
 	customerService service.CustomerService = service.NewCustomerService(customerRepository)
-	customerContoller controller.CustomerController = controller.NewCustomerController(customerService)
-
-	// images
 	imageService service.ImageService = service.NewImageService()
+	
+	// controller
+	employeeController controller.EmployeeController = controller.NewEmployeeController(employeeService)
+	customerContoller controller.CustomerController = controller.NewCustomerController(customerService)
 	imageController controller.ImageController = controller.NewImageController(imageService)
 )
 
@@ -38,9 +38,12 @@ func init() {
 func main() {
 	r := gin.New()
 
-	r.Use(gin.Recovery(), gin.Logger(), middlewares.CORSMiddleware())
+	r.Use(gin.Recovery(), gin.Logger(), middleware.CORSMiddleware())
 
 	api := r.Group("/api")
+	auth := r.Group("/auth")
+
+	api.Use(middleware.AuthMiddleware())
 
 	api.GET("/employees", func(c *gin.Context) {
 		employeeController.GetAllEmployees(c)
@@ -57,15 +60,6 @@ func main() {
 	api.DELETE("/employees/:employee_id", func(c *gin.Context) {
 		employeeController.DeleteEmployee(c)
 	})
-	api.POST("/login", func(c *gin.Context) {
-		employeeController.Login(c)
-	})
-	api.POST("/loginadmin", func(c *gin.Context) {
-		employeeController.LoginAdmin(c)
-	})
-	api.POST("/logout", func(c *gin.Context) {
-		employeeController.Logout(c)
-	})
 
 	api.GET("/customers" , func(c *gin.Context) {
 		customerContoller.GetAllCustomer(c)
@@ -78,6 +72,13 @@ func main() {
 	})
 	api.GET("/customers/financial", func(c *gin.Context) {
 		customerContoller.GetFinancialStatements(c)
+	})
+
+	auth.POST("/login", func(c *gin.Context) {
+		employeeController.Login(c)
+	})
+	auth.POST("/logout", func(c *gin.Context) {
+		employeeController.Logout(c)
 	})
 
 	r.GET("/:image_path", func(c *gin.Context) {

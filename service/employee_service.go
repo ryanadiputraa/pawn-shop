@@ -18,7 +18,6 @@ type EmployeeService interface {
 	Register(ctx *gin.Context) (code int, response interface{})
 	Update(ctx *gin.Context) (code int, response interface{})
 	Login(ctx *gin.Context) (code int, response interface{})
-	LoginAdmin(ctx *gin.Context) (code int, response interface{})
 	Logout(ctx *gin.Context) (code int, response interface{})
 	DeleteEmployee(ctx *gin.Context) (code int, response interface{})
 }
@@ -34,26 +33,6 @@ func NewEmployeeService(repository repository.EmployeeRepository) EmployeeServic
 }
 
 func (service *employeeService) GetAllEmployees(ctx *gin.Context) (code int, response interface{}) {
-	cookie, err := ctx.Cookie("jwt")
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "no cookie found",
-		}
-		return http.StatusUnauthorized, response
-	}
-
-	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return []byte(config.GetAdminKey()), nil
-	})
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "unauthorized",
-		}
-		return http.StatusUnauthorized, response
-	}
-
 	URLQuery := ctx.Request.URL.Query()
 	var queryParam string
 	if len(URLQuery) > 0 {
@@ -81,26 +60,6 @@ func (service *employeeService) GetAllEmployees(ctx *gin.Context) (code int, res
 }
 
 func (service *employeeService) GetEmployeeById(ctx *gin.Context) (code int, response interface{}) {
-	cookie, err := ctx.Cookie("jwt")
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "no cookie found",
-		}
-		return http.StatusUnauthorized, response
-	}
-
-	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return []byte(config.GetAdminKey()), nil
-	})
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "unauthorized",
-		}
-		return http.StatusUnauthorized, response
-	}
-	
 	employeeId := ctx.Param("employee_id")
 	employee, code, err := service.repository.GetById(employeeId)
 	if err != nil {
@@ -115,30 +74,10 @@ func (service *employeeService) GetEmployeeById(ctx *gin.Context) (code int, res
 }
 
 func (service *employeeService) Register(ctx *gin.Context) (code int, response interface{}) {
-	cookie, err := ctx.Cookie("jwt")
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "no cookie found",
-		}
-		return http.StatusUnauthorized, response
-	}
-
-	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return []byte(config.GetAdminKey()), nil
-	})
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "unauthorized",
-		}
-		return http.StatusUnauthorized, response
-	}
-
 	var employee entity.Employee
 	ctx.BindJSON(&employee)
 
-	code, err = service.repository.Create(employee)
+	code, err := service.repository.Create(employee)
 	if err != nil {
 		response = entity.Error {
 			Code: code,
@@ -155,30 +94,11 @@ func (service *employeeService) Register(ctx *gin.Context) (code int, response i
 }
 
 func (service *employeeService) Update(ctx *gin.Context) (code int, response interface{}) {
-	cookie, err := ctx.Cookie("jwt")
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "no cookie found",
-		}
-		return http.StatusUnauthorized, response
-	}
-
-	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return []byte(config.GetAdminKey()), nil
-	})
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "unauthorized",
-		}
-		return http.StatusUnauthorized, response
-	}
-
 	employeeId := ctx.Param("employee_id")
 	var employee entity.Employee
 	ctx.BindJSON(&employee)
 
+	var err error
 	employee.ID, err = strconv.Atoi(employeeId)
 	if err != nil {
 		response = entity.Error {
@@ -234,38 +154,6 @@ func (service *employeeService) Login(ctx *gin.Context) (code int, response inte
 	response = entity.HTTPCode { Code: code }
 
 	return code, response
-}
-
-func (service *employeeService) LoginAdmin(ctx *gin.Context) (code int, response interface{}) {
-	var loginPayload entity.LoginEmployee
-	ctx.BindJSON(&loginPayload)
-	
-	if loginPayload.ID != 123 && loginPayload.Password != "admin" {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "unauthorized",
-		}
-		return http.StatusUnauthorized, response
-	}
-
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer: strconv.Itoa(loginPayload.ID),
-		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	token, err := claims.SignedString([]byte(config.GetAdminKey()))
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusInternalServerError,
-			Error: "can't generate token",
-		}
-		return http.StatusInternalServerError, response
-	}
-
-	ctx.SetCookie("jwt", token, 60*60*24, "", "", true, true)
-	response = entity.HTTPCode { Code: http.StatusAccepted }
-
-	return http.StatusAccepted, response
 }
 
 func (service *employeeService) Logout(ctx *gin.Context) (code int, response interface{}) {

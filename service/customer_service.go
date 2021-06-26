@@ -11,11 +11,9 @@ import (
 
 	// "strconv"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 
 	"github.com/google/uuid"
-	"github.com/ryanadiputraa/pawn-shop/config"
 	"github.com/ryanadiputraa/pawn-shop/entity"
 	"github.com/ryanadiputraa/pawn-shop/repository"
 )
@@ -38,26 +36,6 @@ func NewCustomerService(repository repository.CustomerRepository) CustomerServic
 }
 
 func (service *customerService) GetAllCustomer(ctx *gin.Context) (code int, response interface{}) {
-	cookie, err := ctx.Cookie("jwt")
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "no cookie found",
-		}
-		return http.StatusUnauthorized, response
-	}
-
-	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return []byte(config.GetSecretKey()), nil
-	})
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "unauthorized",
-		}
-		return http.StatusUnauthorized, response
-	}
-	
 	URLQuery := ctx.Request.URL.Query()
 	var queryParam string
 	if len(URLQuery) > 0 {
@@ -85,26 +63,6 @@ func (service *customerService) GetAllCustomer(ctx *gin.Context) (code int, resp
 }
 
 func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response interface{}) {
-	cookie, err := ctx.Cookie("jwt")
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "no cookie found",
-		}
-		return http.StatusUnauthorized, response
-	}
-
-	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return []byte(config.GetSecretKey()), nil
-	})
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "unauthorized",
-		}
-		return http.StatusUnauthorized, response
-	}
-
 	file, err := ctx.FormFile("upload")
 	if err != nil {
 		response = entity.Error {
@@ -183,26 +141,6 @@ func (service *customerService) CreateLoan(ctx *gin.Context) (code int, response
 }
 
 func (service *customerService) PayOffLoan(ctx *gin.Context) (code int, response interface{}) {
-	cookie, err := ctx.Cookie("jwt")
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "no cookie found",
-		}
-		return http.StatusUnauthorized, response
-	}
-
-	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return []byte(config.GetSecretKey()), nil
-	})
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "unauthorized",
-		}
-		return http.StatusUnauthorized, response
-	}
-
 	customerId := ctx.Param("customer_id")
 	parsedCustomerId, err := uuid.FromBytes([]byte(customerId))
 	code, err = service.repository.PayOffLoan(parsedCustomerId)
@@ -220,26 +158,6 @@ func (service *customerService) PayOffLoan(ctx *gin.Context) (code int, response
 }
 
 func (service *customerService) GetFinancialStatements(ctx *gin.Context) (code int, response interface{}) {
-	cookie, err := ctx.Cookie("jwt")
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "no cookie found",
-		}
-		return http.StatusUnauthorized, response
-	}
-
-	_, err = jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return []byte(config.GetSecretKey()), nil
-	})
-	if err != nil {
-		response = entity.Error {
-			Code: http.StatusUnauthorized,
-			Error: "unauthorized",
-		}
-		return http.StatusUnauthorized, response
-	}
-
 	financialStatements, code, err := service.repository.GetFinancialStatements()
 	if err != nil {
 		response = entity.Error {

@@ -162,7 +162,7 @@ Pawn Shop is a information system for managing Pawn Shop Information System data
 ### Login Employee
 
 -   Method : `POST`
--   Endpoint : `/api/employees/login`
+-   Endpoint : `/auth/login`
 -   Header :
     -   Content-Type : `application/json`
     -   Accept : `application/json`
@@ -186,7 +186,7 @@ Pawn Shop is a information system for managing Pawn Shop Information System data
 ### Logout Employee
 
 -   Method : `POST`
--   Endpoint : `/api/employees/logout`
+-   Endpoint : `/auth/logout`
 -   Header :
     -   Content-Type : `application/json`
     -   Accept : `application/json`
