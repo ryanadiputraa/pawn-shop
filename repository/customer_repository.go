@@ -61,23 +61,28 @@ func (r *customerRepository) CreateLoan(loanId uuid.UUID, itemId uuid.UUID, cust
 	}
 	defer db.Close()
 
+	db.Exec("BEGIN")
 	query := `INSERT INTO loans (loan_id, nominal, interest) VALUES ($1, $2, $3)`
 	_, err = db.Exec(query, loanId, strconv.Itoa(customer.Loan), strconv.Itoa(customer.Interest))
 	if err != nil {
+		db.Exec("ROLLBACK")
 		return http.StatusBadRequest, err	
 	}
 
 	query = `INSERT INTO insurance_items (item_id, item_name, image, status) VALUES ($1, $2, $3, $4)`
 	_, err = db.Exec(query, itemId, customer.InsuranceItem, customer.Image, "jaminan")
 	if err != nil {
+		db.Exec("ROLLBACK")
 		return http.StatusBadRequest, err
 	}
 
 	query = `INSERT INTO customers (customer_id, firstname, lastname, gender, loan, insurance_item, contact) VALUES ($1, $2, $3, $4, $5, $6, $7)`
 	_, err = db.Exec(query, customer.ID, customer.Firstname, customer.Lastname, customer.Gender, loanId, itemId, customer.Contact)
 	if err != nil {
+		db.Exec("ROLLBACK")
 		return http.StatusBadRequest, err	
 	}
+	db.Exec("COMMIT")
 
 	return http.StatusCreated, nil
 }
